@@ -118,7 +118,7 @@ export default async function CustomerCrmPage() {
                                     </tr>
                                 ) : (
                                     crmData.map((customer) => (
-                                        <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors group">
+                                        <tr key={customer.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer">
 
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -126,12 +126,12 @@ export default async function CustomerCrmPage() {
                                                         {customer.name?.charAt(0) || "U"}
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-medium text-slate-800 flex items-center gap-2">
+                                                        <Link href={`/admin/sales/customers/${customer.id}`} className="font-medium text-slate-800 flex items-center gap-2 hover:text-teal-600 transition-colors">
                                                             {customer.name}
                                                             {customer.role === "SUPERADMIN" && (
                                                                 <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Admin</span>
                                                             )}
-                                                        </h4>
+                                                        </Link>
                                                         <p className="text-xs text-slate-500 mt-0.5">{customer.email}</p>
                                                     </div>
                                                 </div>

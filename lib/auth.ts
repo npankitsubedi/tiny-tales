@@ -10,6 +10,7 @@ declare module "next-auth" {
         user: {
             id: string
             role: string
+            name?: string | null
         } & DefaultSession["user"]
     }
 
@@ -22,6 +23,7 @@ declare module "next-auth/jwt" {
     interface JWT extends DefaultJWT {
         id: string
         role: string
+        name?: string | null
     }
 }
 
@@ -48,27 +50,22 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 const user = await db.user.findUnique({
-                    where: {
-                        email: credentials.email
-                    }
+                    where: { email: credentials.email }
                 })
 
-                if (!user) {
-                    return null
-                }
+                if (!user) return null
 
                 const isPasswordValid = await bcrypt.compare(
                     credentials.password,
                     user.passwordHash
                 )
 
-                if (!isPasswordValid) {
-                    return null
-                }
+                if (!isPasswordValid) return null
 
                 return {
                     id: user.id,
                     email: user.email,
+                    name: user.name ?? null,
                     role: user.role,
                 }
             }
@@ -76,9 +73,11 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async jwt({ token, user }) {
+            // On initial sign-in `user` is populated; persist to token
             if (user) {
                 token.id = user.id
                 token.role = user.role
+                token.name = user.name ?? null
             }
             return token
         },
@@ -86,6 +85,7 @@ export const authOptions: NextAuthOptions = {
             if (token && session.user) {
                 session.user.id = token.id as string
                 session.user.role = token.role as string
+                session.user.name = token.name ?? null
             }
             return session
         }

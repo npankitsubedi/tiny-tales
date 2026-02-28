@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { formatNPRCompact } from "@/lib/currency"
 
 const CATEGORY_COLORS: Record<string, { badge: string; gradient: string }> = {
     NEWBORN: { badge: "bg-rose-50 text-rose-600 border-rose-100", gradient: "from-rose-50 via-pink-50 to-fuchsia-50" },
@@ -70,7 +71,7 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
 
                         <div className="flex items-center justify-between mt-auto pt-3">
                             <p className="text-base font-bold text-[--color-text-primary]">
-                                Rs. {basePrice.toFixed(2)}
+                                {formatNPRCompact(basePrice)}
                             </p>
                             <div className="text-xs text-amber-700 font-semibold bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-500 transition-all duration-200 touch-auto">
                                 View →

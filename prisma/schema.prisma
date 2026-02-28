@@ -44,6 +44,9 @@ model Product {
   cogs            Decimal          @db.Decimal(10, 2)
   basePrice       Decimal          @db.Decimal(10, 2)
   isNonReturnable Boolean          @default(false)
+  images          String[]         // Up to 10 Cloudinary URLs (photos & videos)
+  sizeChart       Json?            // [{label, chest, waist, length, ageRange}]
+  babyAgeRange    String?          // e.g. "0-6 months", "6-12 months"
   variants        ProductVariant[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -79,6 +82,8 @@ model Order {
   customerName    String?
   contactPhone    String?
   shippingAddress String?
+  deliveryCity    String?     // Kathmandu, Lalitpur, Bhaktapur, Outside Valley
+  babyAgeMonths   Int?        // Baby's age in months at time of order
   isInternational Boolean     @default(false)
   status          OrderStatus @default(PENDING)
   totalAmount     Decimal     @db.Decimal(10, 2)

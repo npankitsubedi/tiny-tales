@@ -26,6 +26,9 @@ type CreateProductData = {
     cogs: number
     basePrice: number
     isNonReturnable?: boolean
+    images?: string[]
+    sizeChart?: object
+    babyAgeRange?: string
 }
 
 export async function createProduct(data: CreateProductData) {
@@ -40,6 +43,9 @@ export async function createProduct(data: CreateProductData) {
                 cogs: data.cogs,
                 basePrice: data.basePrice,
                 isNonReturnable: data.isNonReturnable ?? false,
+                images: data.images ?? [],
+                sizeChart: data.sizeChart ?? undefined,
+                babyAgeRange: data.babyAgeRange,
             }
         })
 

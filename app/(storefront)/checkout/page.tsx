@@ -11,12 +11,15 @@ import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import { ShoppingBag, MessageCircle, CreditCard, Truck, Loader2 } from "lucide-react"
 
+const DELIVERY_CITIES = ["Kathmandu", "Lalitpur", "Bhaktapur", "Outside Valley"]
+
 const checkoutSchema = z.object({
     customerName: z.string().min(2, "Name is required"),
     contactPhone: z.string().min(7, "Valid phone number required"),
     address: z.string().min(5, "Address is required"),
-    city: z.string().min(2, "City is required"),
+    deliveryCity: z.string().optional(),
     country: z.string().min(2, "Country is required"),
+    babyAgeMonths: z.coerce.number().min(0).max(60).optional(),
     paymentMethod: z.string().min(1, "Select a payment method"),
 })
 type CheckoutForm = z.infer<typeof checkoutSchema>
@@ -35,7 +38,7 @@ export default function CheckoutPage() {
     const [processingStep, setProcessingStep] = useState("")
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm<CheckoutForm>({
-        resolver: zodResolver(checkoutSchema),
+        resolver: zodResolver(checkoutSchema) as any,
         defaultValues: { country: "Nepal", paymentMethod: "COD" }
     })
 
@@ -50,7 +53,9 @@ export default function CheckoutPage() {
         const result = await createOrder({
             customerName: data.customerName,
             contactPhone: data.contactPhone,
-            shippingAddress: `${data.address}, ${data.city}, ${data.country}`,
+            shippingAddress: `${data.address}, ${isNepal && data.deliveryCity ? data.deliveryCity : data.country}`,
+            deliveryCity: data.deliveryCity,
+            babyAgeMonths: data.babyAgeMonths,
             isInternational: !isNepal,
             paymentMethod: data.paymentMethod,
             items: items.map(i => ({ variantId: i.variantId, quantity: i.quantity }))
@@ -66,7 +71,7 @@ export default function CheckoutPage() {
             // ── INTERNATIONAL → WhatsApp ──
             if (!isNepal) {
                 const itemList = items.map(i => `• ${i.quantity}x ${i.title} (${i.size}, ${i.color}) — Rs.${(i.price * i.quantity).toFixed(2)}`).join("\n")
-                const message = `Hi Tiny Tales! 👋\n\nI'd like to place an international order:\n\n${itemList}\n\n📦 *Total: Rs. ${total.toFixed(2)}* (incl. 13% VAT)\n\n📍 Ship to:\n${data.customerName}\n${data.address}, ${data.city}, ${data.country}\n📞 ${data.contactPhone}\n\nPlease help me finalize shipping!`
+                const message = `Hi Tiny Tales! 👋\n\nI'd like to place an international order:\n\n${itemList}\n\n📦 *Total: Rs. ${total.toFixed(2)}* (incl. 13% VAT)\n\n📍 Ship to:\n${data.customerName}\n${data.address}, ${data.deliveryCity || data.country}, ${data.country}\n📞 ${data.contactPhone}\n\nPlease help me finalize shipping!`
                 window.open(`https://wa.me/9779800000000?text=${encodeURIComponent(message)}`, "_blank")
                 setIsProcessing(false)
                 return
@@ -190,25 +195,46 @@ export default function CheckoutPage() {
                                 {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Delivery City — Nepal only */}
+                                {isNepal ? (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Delivery Area</label>
+                                        <select {...register("deliveryCity")}
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition-all bg-slate-50/50">
+                                            <option value="">Select area</option>
+                                            {DELIVERY_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
+                                        <select {...register("country")}
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition-all bg-slate-50/50">
+                                            <option value="Nepal">Nepal 🇳🇵</option>
+                                            <option value="India">India 🇮🇳</option>
+                                            <option value="USA">United States 🇺🇸</option>
+                                            <option value="UK">United Kingdom 🇬🇧</option>
+                                            <option value="Australia">Australia 🇦🇺</option>
+                                            <option value="Canada">Canada 🇨🇦</option>
+                                            <option value="UAE">UAE 🇦🇪</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                )}
+                                {/* Baby Age — helps with size/product recommendation */}
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">City</label>
-                                    <input {...register("city")} placeholder="Kathmandu"
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
-                                    {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city.message}</p>}
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
-                                    <select {...register("country")}
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition-all bg-slate-50/50">
-                                        <option value="Nepal">Nepal 🇳🇵</option>
-                                        <option value="India">India 🇮🇳</option>
-                                        <option value="USA">United States 🇺🇸</option>
-                                        <option value="UK">United Kingdom 🇬🇧</option>
-                                        <option value="Australia">Australia 🇦🇺</option>
-                                        <option value="Canada">Canada 🇨🇦</option>
-                                        <option value="UAE">UAE 🇦🇪</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                                        👶 Baby&apos;s Age <span className="text-slate-400 font-normal">(months, optional)</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={60}
+                                        {...register("babyAgeMonths")}
+                                        placeholder="e.g. 6"
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50"
+                                    />
+                                    <p className="text-xs text-slate-400 mt-1">Helps us recommend the right size</p>
                                 </div>
                             </div>
                         </div>

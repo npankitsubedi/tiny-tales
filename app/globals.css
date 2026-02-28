@@ -1,31 +1,33 @@
 @import "tailwindcss";
-
-/* ─── Google Fonts ─── */
 @import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@600;700&display=swap");
 
 /* ─── Tailwind v4 Theme Tokens ─── */
 @theme inline {
     /* Brand palette */
-    --color-brand-cream:    #FDFBF7;
-    --color-brand-warm:     #FFF1E6;
-    --color-brand-amber:    #F59E0B;
+    --color-brand-cream: #FDFBF7;
+    --color-brand-warm: #FFF1E6;
+    --color-brand-amber: #F59E0B;
     --color-brand-amber-dk: #D97706;
-    --color-brand-rose:     #FB7185;
-    --color-brand-blush:    #FFE4E6;
-    --color-brand-teal:     #5EEAD4;
-    --color-brand-mint:     #D1FAE5;
+    --color-brand-rose: #FB7185;
+    --color-brand-blush: #FFE4E6;
+    --color-brand-teal: #5EEAD4;
+    --color-brand-mint: #D1FAE5;
 
     /* Text */
-    --color-text-primary:   #1E293B;  /* slate-800 — warm near-black, never pure #000 */
-    --color-text-secondary: #64748B;  /* slate-500 */
-    --color-text-muted:     #94A3B8;  /* slate-400 */
+    --color-text-primary: #1E293B;
+    /* slate-800 — warm near-black, never pure #000 */
+    --color-text-secondary: #64748B;
+    /* slate-500 */
+    --color-text-muted: #94A3B8;
+    /* slate-400 */
 
     /* Typography */
-    --font-sans:   "Nunito", system-ui, sans-serif;
-    --font-serif:  "Playfair Display", Georgia, serif;
+    --font-sans: "Nunito", system-ui, sans-serif;
+    --font-serif: "Playfair Display", Georgia, serif;
 
     /* Radius */
-    --radius-card: 1.5rem;     /* 24px */
+    --radius-card: 1.5rem;
+    /* 24px */
     --radius-pill: 9999px;
 
     /* Shadows */
@@ -39,7 +41,9 @@
     --foreground: #1E293B;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -59,7 +63,11 @@ body {
 }
 
 /* ─── Typography Utilities ─── */
-h1, h2, h3, h4, .font-serif {
+h1,
+h2,
+h3,
+h4,
+.font-serif {
     font-family: var(--font-serif);
     letter-spacing: -0.02em;
 }
@@ -72,13 +80,28 @@ h1, h2, h3, h4, .font-serif {
 }
 
 /* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #CBD5E1;
+}
 
 /* ─── Minimum touch target for a11y ─── */
-button, a, [role="button"] {
+button,
+a,
+[role="button"] {
     min-height: 44px;
     min-width: 44px;
 }
@@ -91,8 +114,15 @@ button, a, [role="button"] {
 
 /* ─── Skeleton Pulse Animation ─── */
 @keyframes skeleton-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }
 
 .skeleton {
@@ -103,15 +133,26 @@ button, a, [role="button"] {
 }
 
 @keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* ─── Smooth slide-in animation for drawers ─── */
 @keyframes slide-in-right {
-    from { transform: translateX(100%); }
-    to   { transform: translateX(0); }
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
 }
+
 .animate-slide-in-right {
     animation: slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
@@ -119,7 +160,8 @@ button, a, [role="button"] {
 /* ─── Dark mode (admin area) ─── */
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #FDFBF7;  /* Keep storefront always light */
+        --background: #FDFBF7;
+        /* Keep storefront always light */
         --foreground: #1E293B;
     }
 }

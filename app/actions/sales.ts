@@ -32,6 +32,8 @@ type CreateOrderInput = {
     customerName: string
     contactPhone: string
     shippingAddress: string
+    deliveryCity?: string
+    babyAgeMonths?: number
     isInternational?: boolean
     paymentMethod: string
     items: OrderItemInput[]
@@ -99,6 +101,8 @@ export async function createOrder(data: CreateOrderInput) {
                     customerName: data.customerName,
                     contactPhone: data.contactPhone,
                     shippingAddress: data.shippingAddress,
+                    deliveryCity: data.deliveryCity,
+                    babyAgeMonths: data.babyAgeMonths,
                     isInternational: data.isInternational || false,
                     paymentMethod: data.paymentMethod,
                     totalAmount: totalPricing.toNumber(),
