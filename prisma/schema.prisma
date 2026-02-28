@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  SUPERADMIN
+  INVENTORY_ADMIN
+  SALES_ADMIN
+  ACCOUNTS_ADMIN
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  phone         String?
+  babyBirthMonth String?
+  email         String          @unique
+  passwordHash  String
+  role          Role            @default(CUSTOMER)
+  orders        Order[]
+  abandonedCart AbandonedCart[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+enum ProductCategory {
+  NEWBORN
+  BOYS
+  GIRLS
+  MATERNITY
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  category        ProductCategory
+  cogs            Decimal          @db.Decimal(10, 2)
+  basePrice       Decimal          @db.Decimal(10, 2)
+  isNonReturnable Boolean          @default(false)
+  variants        ProductVariant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id                String      @id @default(cuid())
+  productId         String
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size              String
+  color             String
+  sku               String      @unique
+  stockCount        Int         @default(0)
+  lowStockThreshold Int         @default(5)
+  orderItems        OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+  RETURNED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName    String?
+  contactPhone    String?
+  shippingAddress String?
+  isInternational Boolean     @default(false)
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  taxAmount       Decimal     @db.Decimal(10, 2)
+  paymentMethod String
+  orderItems    OrderItem[]
+  invoice       Invoice?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId       String
+  variant         ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  quantity        Int            @default(1)
+  priceAtPurchase Decimal        @db.Decimal(10, 2)
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountDue     Decimal       @db.Decimal(10, 2)
+  amountPaid    Decimal       @default(0) @db.Decimal(10, 2)
+  taxAmount     Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model AbandonedCart {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cartData  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
