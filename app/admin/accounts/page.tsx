@@ -58,8 +58,8 @@ export default async function AccountsPage() {
         Date: inv.createdAt.toISOString().split('T')[0],
         Status: inv.status,
         PaymentMethod: inv.order.paymentMethod,
-        TotalBilled: "$" + (inv.amountDue ? inv.amountDue.toString() : "0"),
-        TotalTax: "$" + (inv.taxAmount ? inv.taxAmount.toString() : "0")
+        TotalBilled: "Rs. " + (inv.amountDue ? inv.amountDue.toString() : "0"),
+        TotalTax: "Rs. " + (inv.taxAmount ? inv.taxAmount.toString() : "0")
     }))
 
     return (

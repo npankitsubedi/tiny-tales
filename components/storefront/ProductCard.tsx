@@ -34,13 +34,13 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
         >
             <Link
                 href={`/products/${id}`}
-                className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8D9E6] rounded-3xl"
+                className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-[2rem]"
                 aria-label={`View ${title} — RS ${basePrice.toFixed(2)}`}
             >
-                <article className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C8D9E6] transition-all duration-300 h-full flex flex-col">
+                <article className="bg-white rounded-[2rem] overflow-hidden border border-slate-100/60 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-secondary/40 transition-all duration-300 ease-out h-full flex flex-col isolate">
 
                     {/* Image Area */}
-                    <div className={`relative aspect-square bg-gradient-to-br ${colors.gradient} flex items-center justify-center overflow-hidden`}>
+                    <div className={`relative aspect-[4/5] sm:aspect-square bg-gradient-to-br ${colors.gradient} flex items-center justify-center overflow-hidden`}>
                         <motion.div
                             className="text-6xl select-none"
                             whileHover={{ scale: 1.12, rotate: 3 }}
@@ -59,9 +59,9 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 flex flex-col flex-1">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className="font-semibold text-[--color-text-primary] leading-snug line-clamp-2 text-sm flex-1 group-hover:text-[#2D5068] transition-colors">
+                    <div className="p-6 sm:p-7 flex flex-col flex-1 bg-white">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                            <h3 className="font-semibold text-slate-800 leading-snug line-clamp-2 text-[15px] sm:text-base flex-1 group-hover:text-primary transition-colors">
                                 {title}
                             </h3>
                             <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full border ${colors.badge} touch-auto`}>

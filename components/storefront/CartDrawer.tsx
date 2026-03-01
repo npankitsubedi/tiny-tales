@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useCart } from "@/store/cartStore"
 import { ShoppingBag, Minus, Plus, X, ArrowRight, Tag } from "lucide-react"
 import Link from "next/link"
+import NextImage from "next/image"
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -31,13 +32,13 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={onClose} />
 
             {/* Drawer Panel */}
-            <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl border-l border-[#D1D1D1] animate-in slide-in-from-right duration-300">
+            <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl border-l border-slate-200/50 sm:rounded-l-[2.5rem] overflow-hidden animate-in slide-in-from-right duration-300">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-[#D1D1D1] bg-white">
+                <div className="flex items-center justify-between px-6 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-sm z-10 sticky top-0">
                     <h2 className="font-serif text-xl text-slate-800 flex items-center gap-2">
                         <ShoppingBag className="w-5 h-5 text-[#2D5068]" />
                         Your Cart
@@ -67,18 +68,29 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         items.map(item => (
                             <div key={item.variantId} className="bg-white rounded-2xl p-4 border border-amber-50 flex gap-4 items-start shadow-sm">
                                 {/* Emoji thumbnail */}
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#EEF4F9] to-[#F5F5F5] flex items-center justify-center text-2xl shrink-0">
-                                    🍼
+                                <div className="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden border border-slate-100">
+                                    {item.image ? (
+                                        <NextImage
+                                            src={item.image}
+                                            alt={item.title}
+                                            width={64}
+                                            height={64}
+                                            className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
+                                            sizes="64px"
+                                        />
+                                    ) : (
+                                        <div className="text-2xl opacity-50">🍼</div>
+                                    )}
                                 </div>
 
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-0 flex flex-col justify-center">
                                     <div className="flex items-start justify-between gap-2">
-                                        <p className="font-semibold text-slate-800 text-sm leading-tight line-clamp-2">{item.title}</p>
-                                        <button onClick={() => removeItem(item.variantId)} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
+                                        <p className="font-semibold text-slate-800 text-sm leading-tight line-clamp-2 pr-2">{item.title}</p>
+                                        <button onClick={() => removeItem(item.variantId)} className="text-slate-300 hover:text-red-400 transition-colors shrink-0 p-1 -mr-1">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p className="text-xs text-slate-400 mt-0.5">{item.size} · {item.color}</p>
+                                    <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-medium">{item.size} · {item.color}</p>
 
                                     <div className="flex items-center justify-between mt-3">
                                         {/* Quantity controls */}

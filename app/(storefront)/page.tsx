@@ -45,10 +45,10 @@ export default async function StorefrontHomePage() {
         <div className="overflow-x-hidden">
 
             {/* ─── Hero Section ─── */}
-            <section className="relative bg-gradient-to-br from-[#FFF8F0] via-[#FFF1E6] to-[#FDEEE8] min-h-[85vh] flex items-center">
-                {/* Decorative blobs */}
-                <div className="absolute top-20 right-10 w-96 h-96 bg-[#D1D9E6]/30 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-10 left-20 w-72 h-72 bg-rose-200/30 rounded-full blur-3xl pointer-events-none" />
+            <section className="relative bg-gradient-to-tr from-slate-50 via-secondary/10 to-white min-h-[85vh] flex items-center overflow-hidden">
+                {/* Decorative mesh gradients */}
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-secondary/30 via-transparent to-transparent rounded-full blur-3xl pointer-events-none translate-x-1/3 -translate-y-1/3 opacity-80" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-rose-100/40 via-transparent to-transparent rounded-full blur-3xl pointer-events-none -translate-x-1/3 translate-y-1/3 opacity-70" />
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center gap-12">
                     {/* Text */}

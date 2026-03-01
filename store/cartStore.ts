@@ -10,6 +10,7 @@ export type CartItem = {
     quantity: number
     size: string
     color: string
+    image?: string
 }
 
 type CartState = {
