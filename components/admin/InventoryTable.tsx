@@ -42,7 +42,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
 
         const isLowStock = variants.some(v => v.stockCount <= v.lowStockThreshold)
         if (isLowStock) {
-            return <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">Low Stock</span>
+            return <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-[#D9E9F2] text-[#2D5068]">Low Stock</span>
         }
 
         return <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700">In Stock</span>
@@ -74,7 +74,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                         placeholder="Search by title or SKU..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#C8D9E6]/20 focus:border-[#A8BDD0] transition-all"
                     />
                 </div>
             </div>
@@ -122,14 +122,14 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-800 font-medium">${product.basePrice.toFixed(2)}</span>
-                                            <span className="text-xs text-teal-600 mt-0.5">{getProfitMargin(product.basePrice, product.cogs)}% margin</span>
+                                            <span className="text-slate-800 font-medium">RS {product.basePrice.toFixed(2)}</span>
+                                            <span className="text-xs text-[#2D5068] mt-0.5">{getProfitMargin(product.basePrice, product.cogs)}% margin</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <Link
                                             href={`/admin/inventory/${product.id}`}
-                                            className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                                            className="inline-flex items-center justify-center p-2 text-slate-400 hover:text-[#2D5068] hover:bg-[#EEF4F9] rounded-lg transition-colors"
                                             title="Edit Product"
                                         >
                                             <Edit className="h-4 w-4" />

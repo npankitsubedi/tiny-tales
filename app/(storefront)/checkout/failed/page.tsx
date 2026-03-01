@@ -23,7 +23,7 @@ export default function CheckoutFailedPage({
     const message = REASON_MESSAGES[reason] || "Something went wrong with your payment."
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center px-4 py-20">
+        <div className="min-h-screen bg-white flex items-center justify-center px-4 py-20">
             <div className="max-w-md w-full text-center">
 
                 <div className="flex items-center justify-center mb-8">
@@ -39,7 +39,7 @@ export default function CheckoutFailedPage({
                     If you believe this is an error, please contact our support team.
                 </p>
 
-                <div className="bg-amber-50 border border-amber-100 rounded-3xl p-5 mb-8 text-left space-y-2">
+                <div className="bg-[#EEF4F9] border border-[#D1D1D1] rounded-3xl p-5 mb-8 text-left space-y-2">
                     <p className="font-semibold text-slate-700 text-sm">What you can do:</p>
                     <ul className="text-sm text-slate-500 space-y-1.5">
                         <li>✦ Try placing the order again with a different payment method</li>
@@ -50,7 +50,7 @@ export default function CheckoutFailedPage({
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link href="/checkout">
-                        <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-full transition-all shadow-lg shadow-amber-100">
+                        <button className="flex items-center gap-2 bg-[#C8D9E6] hover:bg-[#A8BDD0] text-white font-semibold px-6 py-3 rounded-full transition-all shadow-lg shadow-[#EEF4F9]">
                             <RefreshCw className="w-4 h-4" /> Try Again
                         </button>
                     </Link>

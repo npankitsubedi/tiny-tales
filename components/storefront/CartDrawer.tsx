@@ -34,15 +34,15 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" onClick={onClose} />
 
             {/* Drawer Panel */}
-            <div className="relative w-full max-w-md bg-[#FDFBF7] h-full flex flex-col shadow-2xl border-l border-amber-100 animate-in slide-in-from-right duration-300">
+            <div className="relative w-full max-w-md bg-white h-full flex flex-col shadow-2xl border-l border-[#D1D1D1] animate-in slide-in-from-right duration-300">
 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-amber-100 bg-white">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-[#D1D1D1] bg-white">
                     <h2 className="font-serif text-xl text-slate-800 flex items-center gap-2">
-                        <ShoppingBag className="w-5 h-5 text-amber-600" />
+                        <ShoppingBag className="w-5 h-5 text-[#2D5068]" />
                         Your Cart
                         {cartCount > 0 && (
-                            <span className="text-sm font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full ml-1">
+                            <span className="text-sm font-medium text-[#2D5068] bg-[#EEF4F9] px-2 py-0.5 rounded-full ml-1">
                                 {cartCount} item{cartCount !== 1 ? "s" : ""}
                             </span>
                         )}
@@ -59,7 +59,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <ShoppingBag className="w-16 h-16 text-slate-200" />
                             <p className="font-medium text-slate-500">Your cart is empty</p>
                             <p className="text-sm">Add some beautiful pieces for your little one!</p>
-                            <button onClick={onClose} className="mt-2 text-amber-600 font-semibold text-sm hover:text-amber-700">
+                            <button onClick={onClose} className="mt-2 text-[#2D5068] font-semibold text-sm hover:text-[#2D5068]">
                                 Continue Shopping →
                             </button>
                         </div>
@@ -67,7 +67,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         items.map(item => (
                             <div key={item.variantId} className="bg-white rounded-2xl p-4 border border-amber-50 flex gap-4 items-start shadow-sm">
                                 {/* Emoji thumbnail */}
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-50 to-rose-50 flex items-center justify-center text-2xl shrink-0">
+                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#EEF4F9] to-[#F5F5F5] flex items-center justify-center text-2xl shrink-0">
                                     🍼
                                 </div>
 
@@ -107,10 +107,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                 {/* Footer — only when cart has items */}
                 {items.length > 0 && (
-                    <div className="px-6 py-5 bg-white border-t border-amber-100 space-y-4">
+                    <div className="px-6 py-5 bg-white border-t border-[#D1D1D1] space-y-4">
                         {/* Discount Code */}
                         <div className="flex gap-2">
-                            <div className="flex-1 flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus-within:border-amber-300 transition-colors">
+                            <div className="flex-1 flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus-within:border-[#A8BDD0] transition-colors">
                                 <Tag className="w-4 h-4 text-slate-400 shrink-0" />
                                 <input
                                     type="text"
@@ -143,7 +143,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                         {/* CTA */}
                         <Link href="/checkout" onClick={onClose}>
-                            <button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-4 rounded-2xl transition-all shadow-lg shadow-amber-100 flex items-center justify-center gap-2">
+                            <button className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2">
                                 Proceed to Checkout <ArrowRight className="w-4 h-4" />
                             </button>
                         </Link>

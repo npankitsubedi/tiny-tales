@@ -9,6 +9,9 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { formatRs } from "@/lib/currency"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 export const metadata = {
     title: "Dashboard | Tiny Tales Admin",
@@ -24,7 +27,7 @@ function getDateRange() {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    PENDING: "bg-amber-100 text-amber-700",
+    PENDING: "bg-[#D9E9F2] text-[#2D5068]",
     PROCESSING: "bg-blue-100 text-blue-700",
     SHIPPED: "bg-indigo-100 text-indigo-700",
     DELIVERED: "bg-green-100 text-green-700",
@@ -33,6 +36,9 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function DashboardPage() {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+
     const { start, end } = getDateRange()
 
     // Parallel data fetches
@@ -74,15 +80,15 @@ export default async function DashboardPage() {
             label: "Today's Sales",
             value: formatRs(todaySalesAmount),
             icon: TrendingUp,
-            color: "bg-teal-50 text-teal-600",
-            border: "border-teal-100",
+            color: "bg-[#EEF4F9] text-[#2D5068]",
+            border: "border-[#D1D1D1]",
         },
         {
             label: "Pending Orders",
             value: String(pendingCount),
             icon: Clock,
-            color: "bg-amber-50 text-amber-600",
-            border: "border-amber-100",
+            color: "bg-[#EEF4F9] text-[#2D5068]",
+            border: "border-[#D1D1D1]",
         },
         {
             label: "Active Customers",
@@ -131,7 +137,7 @@ export default async function DashboardPage() {
                     <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                             <h2 className="font-semibold text-slate-800">Recent Orders</h2>
-                            <Link href="/admin/sales" className="text-xs text-teal-600 font-semibold hover:text-teal-700">View All →</Link>
+                            <Link href="/admin/sales" className="text-xs text-[#2D5068] font-semibold hover:text-[#1E293B]">View All →</Link>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
@@ -165,7 +171,7 @@ export default async function DashboardPage() {
                                                 {order.invoice ? (
                                                     <Link
                                                         href={`/admin/sales/invoice/${order.invoice.id}`}
-                                                        className="inline-flex items-center gap-1.5 text-xs text-teal-600 font-semibold hover:text-teal-700"
+                                                        className="inline-flex items-center gap-1.5 text-xs text-[#2D5068] font-semibold hover:text-[#1E293B]"
                                                         target="_blank"
                                                     >
                                                         <FileText className="w-3.5 h-3.5" /> Print
@@ -188,7 +194,7 @@ export default async function DashboardPage() {
                                 <AlertTriangle className="w-4 h-4 text-rose-500" aria-hidden />
                                 Low Stock
                             </h2>
-                            <Link href="/admin/inventory" className="text-xs text-teal-600 font-semibold hover:text-teal-700">Manage →</Link>
+                            <Link href="/admin/inventory" className="text-xs text-[#2D5068] font-semibold hover:text-[#1E293B]">Manage →</Link>
                         </div>
                         <div className="divide-y divide-slate-50">
                             {lowStockItems.length === 0 && (
@@ -200,7 +206,7 @@ export default async function DashboardPage() {
                                         <p className="text-sm font-medium text-slate-800 truncate">{variant.product.title}</p>
                                         <p className="text-xs text-slate-400">{variant.size} · {variant.color}</p>
                                     </div>
-                                    <span className={`ml-3 text-sm font-bold shrink-0 ${variant.stockCount === 0 ? "text-red-600" : "text-amber-600"}`}>
+                                    <span className={`ml-3 text-sm font-bold shrink-0 ${variant.stockCount === 0 ? "text-red-600" : "text-[#2D5068]"}`}>
                                         {variant.stockCount} left
                                     </span>
                                 </div>

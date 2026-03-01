@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { ProductCategory } from "@prisma/client"
+import * as z from "zod"
 
 // Helper to check authorization
 async function checkInventoryAuth() {
@@ -19,33 +20,36 @@ async function checkInventoryAuth() {
     }
 }
 
-type CreateProductData = {
-    title: string
-    description?: string
-    category: ProductCategory
-    cogs: number
-    basePrice: number
-    isNonReturnable?: boolean
-    images?: string[]
-    sizeChart?: object
-    babyAgeRange?: string
-}
+const createProductSchema = z.object({
+    title: z.string().min(3),
+    description: z.string().optional(),
+    category: z.nativeEnum(ProductCategory),
+    cogs: z.coerce.number().min(0),
+    basePrice: z.coerce.number().min(0),
+    isNonReturnable: z.boolean().default(false),
+    images: z.array(z.string()).default([]),
+    sizeChart: z.any().optional(),
+    babyAgeRange: z.string().optional()
+})
+
+type CreateProductData = z.infer<typeof createProductSchema>
 
 export async function createProduct(data: CreateProductData) {
     try {
         await checkInventoryAuth()
+        const parsed = createProductSchema.parse(data)
 
         const newProduct = await db.product.create({
             data: {
-                title: data.title,
-                description: data.description,
-                category: data.category,
-                cogs: data.cogs,
-                basePrice: data.basePrice,
-                isNonReturnable: data.isNonReturnable ?? false,
-                images: data.images ?? [],
-                sizeChart: data.sizeChart ?? undefined,
-                babyAgeRange: data.babyAgeRange,
+                title: parsed.title,
+                description: parsed.description,
+                category: parsed.category,
+                cogs: parsed.cogs,
+                basePrice: parsed.basePrice,
+                isNonReturnable: parsed.isNonReturnable,
+                images: parsed.images,
+                sizeChart: parsed.sizeChart ?? undefined,
+                babyAgeRange: parsed.babyAgeRange,
             }
         })
 
@@ -55,33 +59,32 @@ export async function createProduct(data: CreateProductData) {
 
         return { success: true, data: newProduct }
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return { success: false, error: "Validation failed: " + error.issues[0].message }
+        }
         console.error("[INVENTORY_ERROR] Failed to create product:", error)
         return { success: false, error: error.message || "Failed to create product" }
     }
 }
 
-type CreateProductVariantData = {
-    productId: string
-    size: string
-    color: string
-    sku: string
-    stockCount?: number
-    lowStockThreshold?: number
-}
+const createVariantSchema = z.object({
+    productId: z.string().min(1),
+    size: z.string().min(1),
+    color: z.string().min(1),
+    sku: z.string().min(3),
+    stockCount: z.coerce.number().min(0).default(0),
+    lowStockThreshold: z.coerce.number().min(0).default(5)
+})
+
+type CreateProductVariantData = z.infer<typeof createVariantSchema>
 
 export async function createProductVariant(data: CreateProductVariantData) {
     try {
         await checkInventoryAuth()
+        const parsed = createVariantSchema.parse(data)
 
         const newVariant = await db.productVariant.create({
-            data: {
-                productId: data.productId,
-                size: data.size,
-                color: data.color,
-                sku: data.sku,
-                stockCount: data.stockCount ?? 0,
-                lowStockThreshold: data.lowStockThreshold ?? 5,
-            }
+            data: parsed
         })
 
         const { revalidatePath } = await import("next/cache")
@@ -90,8 +93,50 @@ export async function createProductVariant(data: CreateProductVariantData) {
 
         return { success: true, data: newVariant }
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return { success: false, error: "Validation failed: " + error.issues[0].message }
+        }
         console.error("[INVENTORY_ERROR] Failed to create variant:", error)
         return { success: false, error: error.message || "Failed to create variant" }
+    }
+}
+
+export async function updateProduct(id: string, data: Partial<CreateProductData>) {
+    try {
+        await checkInventoryAuth()
+        const updateProductSchema = createProductSchema.partial()
+        const parsed = updateProductSchema.parse(data)
+
+        const updated = await db.product.update({
+            where: { id }, data: {
+                ...parsed,
+                sizeChart: parsed.sizeChart ?? undefined, // handle nullable
+            }
+        })
+        const { revalidatePath } = await import("next/cache")
+        revalidatePath("/admin/inventory")
+        revalidatePath("/shop")
+        return { success: true, data: updated }
+    } catch (error: any) {
+        return { success: false, error: error.message || "Update product failed" }
+    }
+}
+
+export async function updateProductVariant(id: string, data: Partial<CreateProductVariantData>) {
+    try {
+        await checkInventoryAuth()
+        const updateVariantSchema = createVariantSchema.omit({ productId: true }).partial()
+        const parsed = updateVariantSchema.parse(data)
+
+        const updated = await db.productVariant.update({
+            where: { id }, data: parsed
+        })
+        const { revalidatePath } = await import("next/cache")
+        revalidatePath("/admin/inventory")
+        revalidatePath("/shop")
+        return { success: true, data: updated }
+    } catch (error: any) {
+        return { success: false, error: error.message || "Update variant failed" }
     }
 }
 

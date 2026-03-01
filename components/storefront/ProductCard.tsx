@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { formatNPRCompact } from "@/lib/currency"
+import { formatRsCompact } from "@/lib/currency"
 
 const CATEGORY_COLORS: Record<string, { badge: string; gradient: string }> = {
     NEWBORN: { badge: "bg-rose-50 text-rose-600 border-rose-100", gradient: "from-rose-50 via-pink-50 to-fuchsia-50" },
@@ -34,10 +34,10 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
         >
             <Link
                 href={`/products/${id}`}
-                className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-3xl"
-                aria-label={`View ${title} — Rs. ${basePrice.toFixed(2)}`}
+                className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8D9E6] rounded-3xl"
+                aria-label={`View ${title} — RS ${basePrice.toFixed(2)}`}
             >
-                <article className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-amber-200 transition-all duration-300 h-full flex flex-col">
+                <article className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:border-[#C8D9E6] transition-all duration-300 h-full flex flex-col">
 
                     {/* Image Area */}
                     <div className={`relative aspect-square bg-gradient-to-br ${colors.gradient} flex items-center justify-center overflow-hidden`}>
@@ -61,7 +61,7 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
                     {/* Content */}
                     <div className="p-4 flex flex-col flex-1">
                         <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className="font-semibold text-[--color-text-primary] leading-snug line-clamp-2 text-sm flex-1 group-hover:text-amber-700 transition-colors">
+                            <h3 className="font-semibold text-[--color-text-primary] leading-snug line-clamp-2 text-sm flex-1 group-hover:text-[#2D5068] transition-colors">
                                 {title}
                             </h3>
                             <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full border ${colors.badge} touch-auto`}>
@@ -71,9 +71,9 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
 
                         <div className="flex items-center justify-between mt-auto pt-3">
                             <p className="text-base font-bold text-[--color-text-primary]">
-                                {formatNPRCompact(basePrice)}
+                                {formatRsCompact(basePrice)}
                             </p>
-                            <div className="text-xs text-amber-700 font-semibold bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-500 transition-all duration-200 touch-auto">
+                            <div className="text-xs text-primary-foreground font-semibold bg-secondary px-3 py-1.5 rounded-full border border-border group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200 touch-auto">
                                 View →
                             </div>
                         </div>

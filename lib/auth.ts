@@ -33,7 +33,9 @@ export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(db) as Adapter,
     session: {
         strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 Days
     },
+    useSecureCookies: process.env.NODE_ENV === "production",
     pages: {
         signIn: "/login",
     },

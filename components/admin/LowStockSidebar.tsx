@@ -52,34 +52,34 @@ export default function LowStockSidebar({ variants }: { variants: LowStockVarian
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-amber-50/50 rounded-2xl border border-amber-100 p-5 shadow-sm"
+            className="bg-[#EEF4F9]/50 rounded-2xl border border-[#D1D1D1] p-5 shadow-sm"
         >
             <div className="flex items-center gap-2 mb-5">
-                <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                <div className="p-2 bg-[#D9E9F2] text-[#2D5068] rounded-lg">
                     <AlertCircle className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-amber-900">Critical Alerts</h3>
+                <h3 className="font-semibold text-[#1E293B]">Critical Alerts</h3>
             </div>
 
             {variants.length === 0 ? (
-                <div className="text-center py-6 text-amber-600/70 text-sm">
+                <div className="text-center py-6 text-[#2D5068]/70 text-sm">
                     All products are optimally stocked!
                 </div>
             ) : (
                 <div className="space-y-4">
-                    <p className="text-xs font-medium text-amber-700 uppercase tracking-wider mb-2">
+                    <p className="text-xs font-medium text-[#2D5068] uppercase tracking-wider mb-2">
                         {variants.length} Action Needed
                     </p>
                     <div className="max-h-[600px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                         {variants.map((v) => (
-                            <div key={v.id} className="bg-white rounded-xl p-4 border border-amber-100 shadow-sm transition-all hover:shadow-md">
+                            <div key={v.id} className="bg-white rounded-xl p-4 border border-[#D1D1D1] shadow-sm transition-all hover:shadow-md">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <h4 className="font-medium text-slate-800 text-sm truncate w-32 sm:w-40">{v.product.title}</h4>
                                         <span className="text-xs text-slate-500">{v.sku} • {v.color} • {v.size}</span>
                                     </div>
                                     <div className="text-right">
-                                        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-bold ${v.stockCount === 0 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-bold ${v.stockCount === 0 ? 'bg-red-100 text-red-700' : 'bg-[#D9E9F2] text-[#2D5068]'}`}>
                                             {v.stockCount} left
                                         </span>
                                         <div className="text-[10px] text-slate-400 mt-0.5">Threshold: {v.lowStockThreshold}</div>
@@ -94,12 +94,12 @@ export default function LowStockSidebar({ variants }: { variants: LowStockVarian
                                             value={newStock}
                                             onChange={(e) => setNewStock(e.target.value)}
                                             placeholder="New qty"
-                                            className="w-full text-sm rounded-lg border-slate-200 p-1.5 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none border"
+                                            className="w-full text-sm rounded-lg border-slate-200 p-1.5 focus:ring-2 focus:ring-[#C8D9E6]/20 focus:border-[#A8BDD0] outline-none border"
                                         />
                                         <button
                                             onClick={() => handleQuickRestock(v.id)}
                                             disabled={isUpdating}
-                                            className="bg-amber-500 hover:bg-amber-600 text-white p-1.5 rounded-lg transition-colors flex items-center justify-center disabled:opacity-70"
+                                            className="bg-primary hover:opacity-90 text-primary-foreground p-1.5 rounded-lg transition-opacity flex items-center justify-center disabled:opacity-70"
                                         >
                                             {isUpdating ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
                                         </button>
@@ -116,7 +116,7 @@ export default function LowStockSidebar({ variants }: { variants: LowStockVarian
                                             setEditingId(v.id)
                                             setNewStock(v.stockCount.toString())
                                         }}
-                                        className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-medium rounded-lg transition-colors border border-amber-200/50"
+                                        className="mt-3 w-full flex items-center justify-center gap-1.5 py-1.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-xs font-medium rounded-lg transition-colors border border-secondary"
                                     >
                                         <PackagePlus className="h-3.5 w-3.5" /> Quick Restock
                                     </button>

@@ -40,7 +40,7 @@ export default function VariantSelector({ variants, productId, productTitle, bas
             </span>
         )
         if (stockCount <= lowStockThreshold) return (
-            <span className="text-sm font-semibold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
+            <span className="text-sm font-semibold text-[#2D5068] bg-[#EEF4F9] px-3 py-1.5 rounded-full border border-[#D1D1D1]">
                 ⚡ Only {stockCount} left!
             </span>
         )
@@ -80,8 +80,8 @@ export default function VariantSelector({ variants, productId, productTitle, bas
                             key={size}
                             onClick={() => setSelectedSize(size)}
                             className={`px-4 py-2 text-sm font-medium rounded-full border-2 transition-all ${selectedSize === size
-                                    ? "border-slate-800 bg-slate-800 text-white"
-                                    : "border-slate-200 text-slate-700 hover:border-slate-400"
+                                ? "border-slate-800 bg-slate-800 text-white"
+                                : "border-slate-200 text-slate-700 hover:border-slate-400"
                                 }`}
                         >
                             {size}
@@ -101,8 +101,8 @@ export default function VariantSelector({ variants, productId, productTitle, bas
                             key={color}
                             onClick={() => setSelectedColor(color)}
                             className={`px-4 py-2 text-sm font-medium rounded-full border-2 transition-all ${selectedColor === color
-                                    ? "border-amber-500 bg-amber-500 text-white"
-                                    : "border-slate-200 text-slate-700 hover:border-amber-300"
+                                ? "border-primary bg-primary text-primary-foreground font-semibold"
+                                : "border-slate-200 text-slate-700 hover:border-slate-300"
                                 }`}
                         >
                             {color}
@@ -123,7 +123,7 @@ export default function VariantSelector({ variants, productId, productTitle, bas
             <button
                 onClick={handleAddToCart}
                 disabled={!selectedVariant || selectedVariant.stockCount === 0}
-                className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-2xl transition-all shadow-lg shadow-amber-100 hover:shadow-amber-200 text-base"
+                className="w-full bg-primary hover:opacity-90 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-primary-foreground font-semibold py-4 rounded-2xl transition-all shadow-lg text-base"
             >
                 {!selectedVariant
                     ? "Select options to continue"

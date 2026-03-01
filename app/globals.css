@@ -1,25 +1,37 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@600;700&display=swap");
 @import "tailwindcss";
 
 /* ─── Tailwind v4 Theme Tokens ─── */
 @theme inline {
-    /* Brand palette */
-    --color-brand-cream: #FDFBF7;
-    --color-brand-warm: #FFF1E6;
-    --color-brand-amber: #F59E0B;
-    --color-brand-amber-dk: #D97706;
-    --color-brand-rose: #FB7185;
-    --color-brand-blush: #FFE4E6;
-    --color-brand-teal: #5EEAD4;
-    --color-brand-mint: #D1FAE5;
+    /* ── Dusty Periwinkle Brand Palette ── */
+    --color-brand-primary: #C8D9E6;
+    /* Dusty Periwinkle – buttons, active states */
+    --color-brand-primary-dk: #A8BDD0;
+    /* Darker periwinkle for hover states */
+    --color-brand-soft: #EEF4F9;
+    /* Lightest periwinkle tint – chip backgrounds */
+    --color-brand-bg: #FFFFFF;
+    /* Pure White – page background */
+    --color-brand-surface: #F5F5F5;
+    /* Soft Ghost – cards, form inputs, sidebar */
+    --color-brand-border: #D1D1D1;
+    /* Silver Lining – borders, dividers */
+
+    /* ── Legacy aliases kept for gradual migration ── */
+    --color-brand-cream: #FFFFFF;
+    --color-brand-warm: #F5F5F5;
+    --color-brand-amber: #C8D9E6;
+    --color-brand-rose: #A8BDD0;
+    --color-brand-blush: #EEF4F9;
+    --color-brand-teal: #C8D9E6;
+    --color-brand-mint: #EEF4F9;
 
     /* Text */
     --color-text-primary: #1E293B;
-    /* slate-800 — warm near-black, never pure #000 */
-    --color-text-secondary: #64748B;
-    /* slate-500 */
+    /* Slate-800 – main body text, WCAG AA safe */
+    --color-text-secondary: #475569;
+    /* Slate-600 */
     --color-text-muted: #94A3B8;
-    /* slate-400 */
+    /* Slate-400 */
 
     /* Typography */
     --font-sans: "Nunito", system-ui, sans-serif;
@@ -32,13 +44,20 @@
 
     /* Shadows */
     --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
-    --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 4px 10px -6px rgb(0 0 0 / 0.06);
+    --shadow-card-hover: 0 8px 24px -4px rgb(200 217 230 / 0.35), 0 4px 10px -6px rgb(0 0 0 / 0.06);
 }
 
 /* ─── Base Styles ─── */
 :root {
-    --background: #FDFBF7;
+    --background: #FFFFFF;
     --foreground: #1E293B;
+    --primary: #1E293B;
+    --primary-foreground: #FFFFFF;
+    --secondary: #C8D9E6;
+    --secondary-foreground: #1E293B;
+    --muted: #F5F5F5;
+    --border: #D1D1D1;
+    --ring: #A8BDD0;
 }
 
 *,
@@ -74,7 +93,7 @@ h4,
 
 /* ─── Focus Styles (a11y) ─── */
 :focus-visible {
-    outline: 2px solid #F59E0B;
+    outline: 2px solid #C8D9E6;
     outline-offset: 3px;
     border-radius: 6px;
 }
@@ -90,12 +109,12 @@ h4,
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #E2E8F0;
+    background: #D1D1D1;
     border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #CBD5E1;
+    background: #A8BDD0;
 }
 
 /* ─── Minimum touch target for a11y ─── */
@@ -112,7 +131,19 @@ a,
     min-width: unset;
 }
 
-/* ─── Skeleton Pulse Animation ─── */
+/* ─── Brand Button Utility ─── */
+.btn-primary {
+    background-color: #C8D9E6;
+    color: #1E293B;
+    font-weight: 600;
+    transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary:hover {
+    background-color: #A8BDD0;
+}
+
+/* ─── Skeleton Shimmer Animation ─── */
 @keyframes skeleton-pulse {
 
     0%,
@@ -142,7 +173,7 @@ a,
     }
 }
 
-/* ─── Smooth slide-in animation for drawers ─── */
+/* ─── Drawer Animation ─── */
 @keyframes slide-in-right {
     from {
         transform: translateX(100%);
@@ -157,11 +188,10 @@ a,
     animation: slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* ─── Dark mode (admin area) ─── */
+/* ─── Always light (no dark mode override) ─── */
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: #FDFBF7;
-        /* Keep storefront always light */
+        --background: #FFFFFF;
         --foreground: #1E293B;
     }
 }

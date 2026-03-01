@@ -1,11 +1,13 @@
 import { db } from "@/lib/db"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { ArrowLeft, MessageCircle, ShoppingBag, FileText } from "lucide-react"
 import Link from "next/link"
 import { formatRs } from "@/lib/currency"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 
 const STATUS_COLORS: Record<string, string> = {
-    PENDING: "bg-amber-100 text-amber-700",
+    PENDING: "bg-[#D9E9F2] text-[#2D5068]",
     PROCESSING: "bg-blue-100 text-blue-700",
     SHIPPED: "bg-indigo-100 text-indigo-700",
     DELIVERED: "bg-green-100 text-green-700",
@@ -13,14 +15,19 @@ const STATUS_COLORS: Record<string, string> = {
     RETURNED: "bg-slate-100 text-slate-600",
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-    const user = await db.user.findUnique({ where: { id: params.id }, select: { name: true } })
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const user = await db.user.findUnique({ where: { id }, select: { name: true } })
     return { title: `${user?.name ?? "Customer"} — Customer 360 | Tiny Tales Admin` }
 }
 
-export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
+export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+
+    const { id } = await params
     const user = await db.user.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             orders: {
                 orderBy: { createdAt: "desc" },
@@ -51,13 +58,13 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         <div className="min-h-screen bg-slate-50 p-6 md:p-10 space-y-6">
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Back */}
-                <Link href="/admin/sales/customers" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors">
+                <Link href="/admin/sales/customers" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#2D5068] font-medium transition-colors">
                     <ArrowLeft className="w-4 h-4" /> Back to Customers
                 </Link>
 
                 {/* Hero/Profile Card */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                    <div className="w-16 h-16 rounded-2xl bg-teal-50 text-teal-600 font-bold text-2xl flex items-center justify-center border border-teal-100 shrink-0">
+                    <div className="w-16 h-16 rounded-2xl bg-[#EEF4F9] text-[#2D5068] font-bold text-2xl flex items-center justify-center border border-[#D1D1D1] shrink-0">
                         {user.name?.charAt(0)?.toUpperCase() ?? "U"}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -149,7 +156,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                                                     <Link
                                                         href={`/admin/sales/invoice/${order.invoice.id}`}
                                                         target="_blank"
-                                                        className="inline-flex items-center gap-1 text-xs text-teal-600 font-semibold hover:text-teal-700"
+                                                        className="inline-flex items-center gap-1 text-xs text-[#2D5068] font-semibold hover:text-[#1E293B]"
                                                     >
                                                         <FileText className="w-3.5 h-3.5" /> Print
                                                     </Link>

@@ -56,7 +56,7 @@ export async function GET(req: Request) {
         }
 
         // Step 3: Server-confirmed — finalize the order
-        await db.order.update({ where: { id: orderId }, data: { status: "PROCESSING" } })
+        await db.order.update({ where: { id: orderId }, data: { status: "CONFIRMED" } })
         return NextResponse.redirect(new URL(`/checkout/success?orderId=${orderId}`, base))
 
     } catch (error) {

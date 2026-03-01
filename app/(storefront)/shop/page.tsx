@@ -60,7 +60,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
     }
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7]">
+        <div className="min-h-screen bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Page Header */}
                 <div className="mb-10">
@@ -82,12 +82,12 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
                             </h3>
                             <div className="space-y-1">
                                 <Link href={buildUrl({ ...(sort ? { sort } : {}) })}
-                                    className={`block px-3 py-2 text-sm rounded-xl transition-colors ${!validCategory ? "bg-amber-50 text-amber-700 font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                                    className={`block px-3 py-2 text-sm rounded-xl transition-colors ${!validCategory ? "bg-[#EEF4F9] text-[#2D5068] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
                                     All Products
                                 </Link>
                                 {CATEGORIES.map(cat => (
                                     <Link key={cat} href={buildUrl({ category: cat, ...(sort ? { sort } : {}) })}
-                                        className={`block px-3 py-2 text-sm rounded-xl transition-colors capitalize ${validCategory === cat ? "bg-amber-50 text-amber-700 font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                                        className={`block px-3 py-2 text-sm rounded-xl transition-colors capitalize ${validCategory === cat ? "bg-[#EEF4F9] text-[#2D5068] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
                                         {cat.charAt(0) + cat.slice(1).toLowerCase()}
                                     </Link>
                                 ))}
@@ -99,7 +99,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
                             <div className="space-y-1">
                                 {SORT_OPTIONS.map(opt => (
                                     <Link key={opt.value} href={buildUrl({ ...(validCategory ? { category: validCategory } : {}), sort: opt.value })}
-                                        className={`block px-3 py-2 text-sm rounded-xl transition-colors ${sort === opt.value ? "bg-amber-50 text-amber-700 font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
+                                        className={`block px-3 py-2 text-sm rounded-xl transition-colors ${sort === opt.value ? "bg-[#EEF4F9] text-[#2D5068] font-semibold" : "text-slate-600 hover:bg-slate-50"}`}>
                                         {opt.label}
                                     </Link>
                                 ))}
@@ -112,12 +112,12 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
                         {/* Mobile horizontal filter strip */}
                         <div className="flex gap-2 overflow-x-auto pb-3 mb-4 lg:hidden snap-x scrollbar-none -mx-4 px-4">
                             <Link href={buildUrl({ ...(sort ? { sort } : {}) })}
-                                className={`shrink-0 px-4 py-2 text-sm font-semibold rounded-full border transition-colors snap-start ${!validCategory ? "bg-amber-500 text-white border-amber-500" : "bg-white text-slate-600 border-slate-200 hover:border-amber-300"}`}>
+                                className={`shrink-0 px-4 py-2 text-sm font-semibold rounded-full border transition-colors snap-start ${!validCategory ? "bg-primary text-primary-foreground border-primary" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                                 All
                             </Link>
                             {CATEGORIES.map(cat => (
                                 <Link key={cat} href={buildUrl({ category: cat, ...(sort ? { sort } : {}) })}
-                                    className={`shrink-0 px-4 py-2 text-sm font-semibold rounded-full border transition-colors snap-start capitalize ${validCategory === cat ? "bg-amber-500 text-white border-amber-500" : "bg-white text-slate-600 border-slate-200 hover:border-amber-300"}`}>
+                                    className={`shrink-0 px-4 py-2 text-sm font-semibold rounded-full border transition-colors snap-start capitalize ${validCategory === cat ? "bg-primary text-primary-foreground border-primary" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                                     {cat.charAt(0) + cat.slice(1).toLowerCase()}
                                 </Link>
                             ))}
@@ -128,7 +128,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
                                 <Search className="w-12 h-12 mx-auto mb-4 text-slate-200" aria-hidden="true" />
                                 <p className="font-semibold text-slate-500">No products found</p>
                                 <p className="text-sm mt-1">Try selecting a different category</p>
-                                <Link href="/shop" className="mt-4 inline-block text-amber-600 font-semibold text-sm hover:text-amber-700">Clear filters →</Link>
+                                <Link href="/shop" className="mt-4 inline-block text-[#2D5068] font-semibold text-sm hover:text-[#2D5068]">Clear filters →</Link>
                             </div>
                         ) : (
                             <AnimatedProductGrid products={formatted} />

@@ -19,7 +19,7 @@ function SuccessContent() {
     }, [clearCart])
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center px-4 py-20">
+        <div className="min-h-screen bg-white flex items-center justify-center px-4 py-20">
             <div className="max-w-md w-full text-center">
 
                 {/* Animated Success Icon */}
@@ -55,7 +55,7 @@ function SuccessContent() {
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link href="/shop">
-                        <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-full transition-all shadow-lg shadow-amber-100">
+                        <button className="flex items-center gap-2 bg-[#C8D9E6] hover:bg-[#A8BDD0] text-white font-semibold px-6 py-3 rounded-full transition-all shadow-lg shadow-[#EEF4F9]">
                             <ShoppingBag className="w-4 h-4" /> Continue Shopping
                         </button>
                     </Link>
@@ -73,7 +73,7 @@ function SuccessContent() {
 export default function CheckoutSuccessPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+            <div className="min-h-screen bg-white flex items-center justify-center">
                 <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
             </div>
         }>

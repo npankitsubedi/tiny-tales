@@ -64,7 +64,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
     const galleryItems = [1, 2, 3, 4]
 
     return (
-        <div className="bg-[#FDFBF7] min-h-screen">
+        <div className="bg-white min-h-screen">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
                 {/* Breadcrumb */}
@@ -82,7 +82,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
                     {/* ── Left: Image Gallery ── */}
                     <div className="space-y-4 lg:sticky lg:top-24">
                         {/* Main Image */}
-                        <div className="aspect-square rounded-3xl bg-gradient-to-br from-amber-50 via-rose-50 to-purple-50 border border-amber-100 flex items-center justify-center overflow-hidden shadow-sm">
+                        <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#EEF4F9] via-rose-50 to-purple-50 border border-[#D1D1D1] flex items-center justify-center overflow-hidden shadow-sm">
                             <span className="text-[160px] select-none leading-none">
                                 {CATEGORY_EMOJI[product.category] || "🍼"}
                             </span>
@@ -91,7 +91,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
                         {/* Thumbnail Row */}
                         <div className="grid grid-cols-4 gap-3">
                             {galleryItems.map(i => (
-                                <div key={i} className="aspect-square rounded-2xl bg-gradient-to-br from-amber-50 to-rose-50 border-2 border-amber-100 hover:border-amber-400 cursor-pointer transition-colors flex items-center justify-center">
+                                <div key={i} className="aspect-square rounded-2xl bg-gradient-to-br from-[#EEF4F9] to-[#F5F5F5] border-2 border-[#D1D1D1] hover:border-[#A8BDD0] cursor-pointer transition-colors flex items-center justify-center">
                                     <span className="text-2xl opacity-40 select-none">
                                         {CATEGORY_EMOJI[product.category] || "🍼"}
                                     </span>
@@ -105,7 +105,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
                         {/* Header Info */}
                         <div>
                             <div className="flex items-center gap-3 mb-3">
-                                <span className="text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                                <span className="text-xs font-bold uppercase tracking-widest text-[#2D5068] bg-[#EEF4F9] px-3 py-1 rounded-full">
                                     {product.category.charAt(0) + product.category.slice(1).toLowerCase()}
                                 </span>
                                 {product.isNonReturnable && (
@@ -121,7 +121,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
 
                             <div className="flex items-baseline gap-3 mb-5">
                                 <span className="text-3xl font-bold text-slate-900">
-                                    Rs. {basePrice.toFixed(2)}
+                                    RS {basePrice.toFixed(2)}
                                 </span>
                                 <span className="text-sm text-slate-400">Incl. VAT</span>
                             </div>
@@ -156,8 +156,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
                             <h3 className="font-semibold text-slate-800 text-sm uppercase tracking-wider">Care & Material</h3>
                             {CARE_INSTRUCTIONS.map(({ icon: Icon, label, desc }) => (
                                 <div key={label} className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0">
-                                        <Icon className="w-5 h-5 text-amber-600" />
+                                    <div className="w-10 h-10 rounded-2xl bg-[#EEF4F9] flex items-center justify-center shrink-0">
+                                        <Icon className="w-5 h-5 text-[#2D5068]" />
                                     </div>
                                     <div>
                                         <p className="font-semibold text-slate-800 text-sm">{label}</p>

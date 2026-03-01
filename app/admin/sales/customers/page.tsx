@@ -16,7 +16,7 @@ async function verifySalesAccess() {
     if (!session || !session.user || !("role" in session.user)) {
         redirect("/login")
     }
-    const allowed = ["SUPERADMIN", "SALES_ADMIN"]
+    const allowed = ["SUPERADMIN"]
     if (!allowed.includes(session.user.role as string)) {
         redirect("/unauthorized")
     }
@@ -126,7 +126,7 @@ export default async function CustomerCrmPage() {
                                                         {customer.name?.charAt(0) || "U"}
                                                     </div>
                                                     <div>
-                                                        <Link href={`/admin/sales/customers/${customer.id}`} className="font-medium text-slate-800 flex items-center gap-2 hover:text-teal-600 transition-colors">
+                                                        <Link href={`/admin/sales/customers/${customer.id}`} className="font-medium text-slate-800 flex items-center gap-2 hover:text-[#2D5068] transition-colors">
                                                             {customer.name}
                                                             {customer.role === "SUPERADMIN" && (
                                                                 <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Admin</span>
@@ -139,7 +139,7 @@ export default async function CustomerCrmPage() {
 
                                             <td className="px-6 py-4">
                                                 <span className={`px-3 py-1 text-xs font-medium rounded-full ${customer.babyBirthMonth !== "Unknown"
-                                                    ? 'bg-amber-100 text-amber-700'
+                                                    ? 'bg-[#D9E9F2] text-[#2D5068]'
                                                     : 'bg-slate-100 text-slate-500'
                                                     }`}>
                                                     {customer.babyBirthMonth}

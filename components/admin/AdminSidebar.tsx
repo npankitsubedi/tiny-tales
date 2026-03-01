@@ -47,11 +47,11 @@ export default function AdminSidebar() {
                         onClick={onNavClick}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
                             ${active
-                                ? "bg-teal-600 text-white shadow-sm shadow-teal-200"
+                                ? "bg-primary text-primary-foreground shadow-sm shadow-[#D9E9F2]"
                                 : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
                         aria-current={active ? "page" : undefined}
                     >
-                        <Icon className={`w-5 h-5 shrink-0 ${active ? "text-white" : "text-slate-400 group-hover:text-teal-600"}`} aria-hidden="true" />
+                        <Icon className={`w-5 h-5 shrink-0 ${active ? "text-slate-700" : "text-slate-400 group-hover:text-[#2D5068]"}`} aria-hidden="true" />
                         <span className={`truncate transition-all ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}>{label}</span>
                     </Link>
                 )
@@ -68,8 +68,8 @@ export default function AdminSidebar() {
             >
                 {/* Brand Header */}
                 <div className={`flex items-center gap-2.5 px-4 py-5 border-b border-slate-100 ${collapsed ? "justify-center" : ""}`}>
-                    <div className="w-8 h-8 bg-teal-600 rounded-xl flex items-center justify-center shrink-0">
-                        <Baby className="w-4 h-4 text-white" aria-hidden="true" />
+                    <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center shrink-0">
+                        <Baby className="w-4 h-4 text-primary" aria-hidden="true" />
                     </div>
                     {!collapsed && (
                         <span className="font-bold text-slate-800 text-sm leading-tight">
@@ -124,8 +124,8 @@ export default function AdminSidebar() {
                     >
                         <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100">
                             <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 bg-teal-600 rounded-xl flex items-center justify-center">
-                                    <Baby className="w-4 h-4 text-white" aria-hidden="true" />
+                                <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center">
+                                    <Baby className="w-4 h-4 text-primary" aria-hidden="true" />
                                 </div>
                                 <span className="font-bold text-slate-800 text-sm">Tiny Tales Admin</span>
                             </div>

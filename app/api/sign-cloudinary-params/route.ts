@@ -16,7 +16,8 @@ export async function POST(request: Request) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
         }
         const role = session.user.role as string
-        if (role !== "SUPERADMIN" && role !== "INVENTORY_ADMIN") {
+        // Enforce pure SUPERADMIN authorization mapping
+        if (role !== "SUPERADMIN") {
             return new Response(JSON.stringify({ error: "Forbidden: Restricted to Admins" }), { status: 403 })
         }
 

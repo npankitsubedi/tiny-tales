@@ -10,9 +10,6 @@ datasource db {
 enum Role {
   CUSTOMER
   SUPERADMIN
-  INVENTORY_ADMIN
-  SALES_ADMIN
-  ACCOUNTS_ADMIN
 }
 
 model User {
@@ -68,8 +65,10 @@ model ProductVariant {
 
 enum OrderStatus {
   PENDING
-  PROCESSING
+  CONFIRMED
+  PACKED
   SHIPPED
+  OUT_FOR_DELIVERY
   DELIVERED
   CANCELED
   RETURNED

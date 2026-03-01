@@ -152,18 +152,18 @@ export default function CheckoutPage() {
     }
 
     if (items.length === 0) return (
-        <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-center px-4">
+        <div className="min-h-screen bg-white flex items-center justify-center text-center px-4">
             <div>
                 <ShoppingBag className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                 <h2 className="font-serif text-2xl text-slate-700 mb-2">Your cart is empty</h2>
                 <p className="text-slate-500 mb-6">Add some products before checking out.</p>
-                <a href="/shop" className="bg-amber-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-amber-600 transition-colors">Browse Shop</a>
+                <a href="/shop" className="bg-primary text-primary-foreground px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-opacity">Browse Shop</a>
             </div>
         </div>
     )
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12">
+        <div className="min-h-screen bg-white py-12">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="font-serif text-4xl text-slate-800 mb-10">Checkout</h1>
 
@@ -178,20 +178,20 @@ export default function CheckoutPage() {
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
                                     <input {...register("customerName")} placeholder="Sita Thapa"
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
                                     {errors.customerName && <p className="text-xs text-red-500 mt-1">{errors.customerName.message}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
                                     <input {...register("contactPhone")} placeholder="+977 98XXXXXXXX"
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
                                     {errors.contactPhone && <p className="text-xs text-red-500 mt-1">{errors.contactPhone.message}</p>}
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Street Address</label>
                                 <input {...register("address")} placeholder="Thamel, Kathmandu"
-                                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
+                                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50" />
                                 {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -200,7 +200,7 @@ export default function CheckoutPage() {
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Delivery Area</label>
                                         <select {...register("deliveryCity")}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition-all bg-slate-50/50">
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] transition-all bg-slate-50/50">
                                             <option value="">Select area</option>
                                             {DELIVERY_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
@@ -209,7 +209,7 @@ export default function CheckoutPage() {
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
                                         <select {...register("country")}
-                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition-all bg-slate-50/50">
+                                            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] transition-all bg-slate-50/50">
                                             <option value="Nepal">Nepal 🇳🇵</option>
                                             <option value="India">India 🇮🇳</option>
                                             <option value="USA">United States 🇺🇸</option>
@@ -232,7 +232,7 @@ export default function CheckoutPage() {
                                         max={60}
                                         {...register("babyAgeMonths")}
                                         placeholder="e.g. 6"
-                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50"
+                                        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#A8BDD0] focus:ring-2 focus:ring-amber-100 transition-all bg-slate-50/50"
                                     />
                                     <p className="text-xs text-slate-400 mt-1">Helps us recommend the right size</p>
                                 </div>
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
                             {isNepal ? (
                                 <div className="grid grid-cols-2 gap-3">
                                     {NEPAL_PAYMENT_OPTIONS.map(opt => (
-                                        <label key={opt.value} className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedPayment === opt.value ? "border-amber-400 bg-amber-50" : "border-slate-100 bg-slate-50/50 hover:border-slate-200"}`}>
+                                        <label key={opt.value} className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedPayment === opt.value ? "border-[#A8BDD0] bg-[#EEF4F9]" : "border-slate-100 bg-slate-50/50 hover:border-slate-200"}`}>
                                             <input type="radio" {...register("paymentMethod")} value={opt.value} className="sr-only" />
                                             <span className="text-2xl">{opt.icon}</span>
                                             <div><p className="font-semibold text-slate-800 text-sm">{opt.label}</p><p className="text-xs text-slate-400">{opt.desc}</p></div>
@@ -288,7 +288,7 @@ export default function CheckoutPage() {
                             </div>
 
                             <button type="submit" disabled={isProcessing}
-                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${isNepal ? "bg-amber-500 hover:bg-amber-600 shadow-amber-100" : "bg-[#25D366] hover:bg-[#20bd5a] shadow-green-100"}`}>
+                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-primary-foreground flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${isNepal ? "bg-primary hover:opacity-90" : "bg-[#25D366] hover:bg-[#20bd5a]"}`}>
                                 {isProcessing ? (
                                     <><Loader2 className="w-4 h-4 animate-spin" /> {processingStep || "Processing…"}</>
                                 ) : isNepal ? (

@@ -19,7 +19,7 @@ async function verifySalesAccess() {
         redirect("/login")
     }
 
-    const allowed = ["SUPERADMIN", "SALES_ADMIN"]
+    const allowed = ["SUPERADMIN"]
     if (!allowed.includes(session.user.role as string)) {
         redirect("/unauthorized")
     }
@@ -49,7 +49,15 @@ export default async function SalesDashboardPage() {
         taxAmount: o.taxAmount.toNumber(),
         orderItems: o.orderItems.map(item => ({
             ...item,
-            priceAtPurchase: item.priceAtPurchase.toNumber()
+            priceAtPurchase: item.priceAtPurchase.toNumber(),
+            variant: {
+                ...item.variant,
+                product: {
+                    ...item.variant.product,
+                    cogs: item.variant.product.cogs.toNumber(),
+                    basePrice: item.variant.product.basePrice.toNumber(),
+                }
+            }
         })),
         invoice: o.invoice ? {
             ...o.invoice,

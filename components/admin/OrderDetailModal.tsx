@@ -147,7 +147,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                                             <span className="text-[10px] font-mono text-slate-400">IMG</span>
                                         </div>
                                         <div>
-                                            <p className="font-medium text-slate-800 text-sm leading-tight group-hover:text-amber-600 transition-colors cursor-pointer">
+                                            <p className="font-medium text-slate-800 text-sm leading-tight group-hover:text-[#2D5068] transition-colors cursor-pointer">
                                                 {item.variant.product.title}
                                             </p>
                                             <p className="text-xs text-slate-500 mt-1">
@@ -159,7 +159,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                                     </div>
                                     <div className="text-right shrink-0">
                                         <p className="font-medium text-slate-800 text-sm">
-                                            ${Number(item.priceAtPurchase).toFixed(2)}
+                                            RS {Number(item.priceAtPurchase).toFixed(2)}
                                         </p>
                                         <p className="text-xs font-bold text-slate-400 mt-0.5 bg-slate-100 inline-block px-1.5 rounded">
                                             x{item.quantity}
@@ -190,12 +190,12 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                             </div>
                             <div className="flex justify-between items-center text-slate-400">
                                 <span>Nepali VAT (13%)</span>
-                                <span className="font-medium">${Number(order.taxAmount).toFixed(2)}</span>
+                                <span className="font-medium">RS {Number(order.taxAmount).toFixed(2)}</span>
                             </div>
 
                             <div className="pt-3 border-t border-slate-700 flex justify-between items-center mt-2">
                                 <span className="font-medium text-slate-100">Total Charged</span>
-                                <span className="text-xl font-bold text-emerald-400">${Number(order.totalAmount).toFixed(2)}</span>
+                                <span className="text-xl font-bold text-emerald-400">RS {Number(order.totalAmount).toFixed(2)}</span>
                             </div>
                         </div>
                     </section>

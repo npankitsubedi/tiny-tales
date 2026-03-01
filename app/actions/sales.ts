@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { OrderStatus, InvoiceStatus, Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { sendOrderStatusEmail } from "@/lib/email"
+import * as z from "zod"
 
 // --- Auth Helpers ---
 async function checkRole(allowedRoles: string[]) {
@@ -21,28 +23,31 @@ async function checkRole(allowedRoles: string[]) {
     return session.user
 }
 
-// --- Types ---
-type OrderItemInput = {
-    variantId: string
-    quantity: number
-}
+const orderItemSchema = z.object({
+    variantId: z.string().min(1),
+    quantity: z.coerce.number().min(1)
+})
 
-type CreateOrderInput = {
-    userId?: string
-    customerName: string
-    contactPhone: string
-    shippingAddress: string
-    deliveryCity?: string
-    babyAgeMonths?: number
-    isInternational?: boolean
-    paymentMethod: string
-    items: OrderItemInput[]
-}
+const createOrderSchema = z.object({
+    userId: z.string().optional(),
+    customerName: z.string().min(2),
+    contactPhone: z.string().min(5),
+    shippingAddress: z.string().min(5),
+    deliveryCity: z.string().optional(),
+    babyAgeMonths: z.coerce.number().optional(),
+    isInternational: z.boolean().optional(),
+    paymentMethod: z.string().min(1),
+    items: z.array(orderItemSchema).min(1)
+})
+
+type CreateOrderInput = z.infer<typeof createOrderSchema>
 
 // --- 1. Core Checkout Logic ---
 export async function createOrder(data: CreateOrderInput) {
     try {
-        if (!data.items || data.items.length === 0) {
+        const parsedData = createOrderSchema.parse(data)
+
+        if (!parsedData.items || parsedData.items.length === 0) {
             throw new Error("Order must contain at least one item")
         }
 
@@ -51,12 +56,19 @@ export async function createOrder(data: CreateOrderInput) {
             let totalPricing = new Prisma.Decimal(0)
             const orderItemsInsert = []
 
-            for (const item of data.items) {
-                // Find Variant
-                const variant = await tx.productVariant.findUnique({
-                    where: { id: item.variantId },
-                    include: { product: true }
-                })
+            // PRE-FETCH all variants at once to prevent N+1 query loops
+            const variantIds = parsedData.items.map(i => i.variantId)
+            const variants = await tx.productVariant.findMany({
+                where: { id: { in: variantIds } },
+                include: { product: true }
+            })
+            const variantMap = new Map(variants.map(v => [v.id, v]))
+
+            // Build update promises and calculate totals in memory
+            const updatePromises = []
+
+            for (const item of parsedData.items) {
+                const variant = variantMap.get(item.variantId)
 
                 if (!variant) throw new Error(`Variant not found: ${item.variantId}`)
 
@@ -65,19 +77,19 @@ export async function createOrder(data: CreateOrderInput) {
                     throw new Error(`Insufficient stock for SKU: ${variant.sku}`)
                 }
 
-                // Deduct immediate stock
-                await tx.productVariant.update({
-                    where: { id: item.variantId },
-                    data: {
-                        stockCount: {
-                            decrement: item.quantity
+                // Stage the fast deduction promise
+                updatePromises.push(
+                    tx.productVariant.update({
+                        where: { id: item.variantId },
+                        data: {
+                            stockCount: {
+                                decrement: item.quantity
+                            }
                         }
-                    }
-                })
+                    })
+                )
 
                 // Calculate item totals safely.
-                // Depending on the Prisma DB Engine mappings `basePrice` might serialize into a standard JS number implicitly or stay Decimal. 
-                // We coerce to new Prisma.Decimal to guarantee operations:
                 const itemPrice = new Prisma.Decimal(variant.product.basePrice.toString())
                 const itemQuantityDec = new Prisma.Decimal(item.quantity)
                 const lineTotal = itemPrice.mul(itemQuantityDec)
@@ -90,6 +102,9 @@ export async function createOrder(data: CreateOrderInput) {
                 })
             }
 
+            // Execute all deductions concurrently inside the locked transaction
+            await Promise.all(updatePromises)
+
             // Calculate 13% Nepalese VAT 
             const taxRate = new Prisma.Decimal(0.13)
             const taxAmount = totalPricing.mul(taxRate)
@@ -97,17 +112,17 @@ export async function createOrder(data: CreateOrderInput) {
             // Create the Order
             const newOrder = await tx.order.create({
                 data: {
-                    userId: data.userId,
-                    customerName: data.customerName,
-                    contactPhone: data.contactPhone,
-                    shippingAddress: data.shippingAddress,
-                    deliveryCity: data.deliveryCity,
-                    babyAgeMonths: data.babyAgeMonths,
-                    isInternational: data.isInternational || false,
-                    paymentMethod: data.paymentMethod,
+                    userId: parsedData.userId,
+                    customerName: parsedData.customerName,
+                    contactPhone: parsedData.contactPhone,
+                    shippingAddress: parsedData.shippingAddress,
+                    deliveryCity: parsedData.deliveryCity,
+                    babyAgeMonths: parsedData.babyAgeMonths,
+                    isInternational: parsedData.isInternational || false,
+                    paymentMethod: parsedData.paymentMethod,
                     totalAmount: totalPricing.toNumber(),
                     taxAmount: taxAmount.toNumber(),
-                    status: OrderStatus.PENDING,
+                    status: parsedData.paymentMethod === "Cash on Delivery" ? OrderStatus.PENDING : OrderStatus.CONFIRMED,
                     orderItems: {
                         create: orderItemsInsert.map(oi => ({
                             ...oi,
@@ -152,6 +167,9 @@ export async function createOrder(data: CreateOrderInput) {
 
         return { success: true, data: result }
     } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            return { success: false, error: "Validation failed: " + error.issues[0].message }
+        }
         return { success: false, error: error.message || "Checkout transaction failed" }
     }
 }
@@ -160,7 +178,7 @@ export async function createOrder(data: CreateOrderInput) {
 // --- 2. Accounts Admin Analytics ---
 export async function getSalesAnalytics() {
     try {
-        await checkRole(["SUPERADMIN", "ACCOUNTS_ADMIN"])
+        await checkRole(["SUPERADMIN"])
 
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -215,11 +233,14 @@ export async function getSalesAnalytics() {
 // --- 3. Order Status Modification logic ---
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus) {
     try {
-        await checkRole(["SUPERADMIN", "SALES_ADMIN"])
+        await checkRole(["SUPERADMIN"])
 
         const order = await db.order.findUnique({
             where: { id: orderId },
-            include: { orderItems: true }
+            include: {
+                orderItems: true,
+                user: { select: { email: true } }
+            }
         })
 
         if (!order) throw new Error("Order not found")
@@ -241,10 +262,64 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
             data: { status: newStatus }
         })
 
+        // --- Transactional Email Trigger ---
+        if (["CONFIRMED", "SHIPPED", "DELIVERED"].includes(newStatus)) {
+            const customerEmail = order.user?.email
+            if (customerEmail) {
+                // Non-blocking trigger. Errors are caught inside the utility and logged.
+                sendOrderStatusEmail(
+                    { id: order.id, customerName: order.customerName, totalAmount: Number(order.totalAmount) },
+                    customerEmail,
+                    newStatus
+                ).catch(console.error)
+            } else {
+                console.log(`[EMAIL_SYSTEM] Order ${orderId} has no associated email (Guest). Skipping notification.`)
+            }
+        }
+
         revalidatePath("/admin/sales")
         return { success: true, data: updatedOrder }
     } catch (error: any) {
         return { success: false, error: error.message || "Failed to edit order status" }
+    }
+}
+
+// --- 4. Payment Capture Logic ---
+export async function capturePayment(orderId: string, paymentMethod: string) {
+    try {
+        await checkRole(["SUPERADMIN"])
+
+        const order = await db.order.findUnique({
+            where: { id: orderId },
+            include: { invoice: true }
+        })
+
+        if (!order) throw new Error("Order not found")
+
+        await db.$transaction(async (tx) => {
+            // Update Order Payment Method
+            await tx.order.update({
+                where: { id: orderId },
+                data: { paymentMethod }
+            })
+
+            // Mark invoice as PAID and update amountPaid to amountDue
+            if (order.invoice) {
+                await tx.invoice.update({
+                    where: { id: order.invoice.id },
+                    data: {
+                        status: InvoiceStatus.PAID,
+                        amountPaid: order.invoice.amountDue
+                    }
+                })
+            }
+        })
+
+        revalidatePath("/admin/sales")
+        revalidatePath("/admin/accounts")
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || "Failed to capture payment" }
     }
 }
 

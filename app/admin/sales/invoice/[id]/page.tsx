@@ -4,20 +4,27 @@
  */
 
 import { db } from "@/lib/db"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { formatRs } from "@/lib/currency"
 import { Heart, Printer } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-    const invoice = await db.invoice.findUnique({ where: { id: params.id }, select: { invoiceNumber: true } })
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const invoice = await db.invoice.findUnique({ where: { id }, select: { invoiceNumber: true } })
     return { title: invoice ? `Invoice ${invoice.invoiceNumber}` : "Invoice Not Found" }
 }
 
-export default async function InvoicePrintPage({ params }: { params: { id: string } }) {
+export default async function InvoicePrintPage({ params }: { params: Promise<{ id: string }> }) {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+
+    const { id } = await params;
     const invoice = await db.invoice.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             order: {
                 include: {
@@ -58,7 +65,7 @@ export default async function InvoicePrintPage({ params }: { params: { id: strin
             <div className="max-w-[794px] mx-auto bg-white shadow-xl my-8 print:my-0 print:shadow-none rounded-2xl print:rounded-none overflow-hidden">
 
                 {/* Header Band */}
-                <div className="bg-gradient-to-r from-amber-400 to-rose-400 px-10 pt-10 pb-8">
+                <div className="bg-gradient-to-r from-amber-400 to-[#A8BDD0] px-10 pt-10 pb-8">
                     <div className="flex justify-between items-start">
                         {/* Brand */}
                         <div className="flex items-center gap-3">
@@ -117,7 +124,7 @@ export default async function InvoicePrintPage({ params }: { params: { id: strin
                     <div>
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="border-b-2 border-amber-100">
+                                <tr className="border-b-2 border-[#D1D1D1]">
                                     <th className="text-left pb-3 text-xs uppercase tracking-widest text-slate-400 font-semibold">Item</th>
                                     <th className="text-center pb-3 text-xs uppercase tracking-widest text-slate-400 font-semibold">Qty</th>
                                     <th className="text-right pb-3 text-xs uppercase tracking-widest text-slate-400 font-semibold">Unit Price</th>
@@ -155,7 +162,7 @@ export default async function InvoicePrintPage({ params }: { params: { id: strin
                             </div>
                             <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-800 text-base">
                                 <span>Total Due</span>
-                                <span className="text-amber-600">{formatRs(Number(invoice.amountDue))}</span>
+                                <span className="text-[#2D5068]">{formatRs(Number(invoice.amountDue))}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className={invoice.status === "PAID" ? "text-emerald-600 font-semibold" : "text-rose-500 font-semibold"}>
@@ -169,7 +176,7 @@ export default async function InvoicePrintPage({ params }: { params: { id: strin
                     </div>
 
                     {/* Thank You Note */}
-                    <div className="bg-amber-50 rounded-2xl p-6 text-center border border-amber-100">
+                    <div className="bg-[#EEF4F9] rounded-2xl p-6 text-center border border-[#D1D1D1]">
                         <p className="font-serif text-lg text-slate-800 mb-1">🎉 Congratulations on your little one!</p>
                         <p className="text-slate-500 text-sm">
                             Thank you for choosing Tiny Tales. Each piece is crafted with love for every precious milestone.

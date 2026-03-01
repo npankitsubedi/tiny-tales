@@ -15,7 +15,7 @@ async function getInventoryData() {
     }
 
     const role = session.user.role as string
-    if (role !== "SUPERADMIN" && role !== "INVENTORY_ADMIN") {
+    if (role !== "SUPERADMIN") {
         redirect("/unauthorized")
     }
 
@@ -77,7 +77,7 @@ export default async function InventoryPage() {
                     </div>
                     <Link
                         href="/admin/inventory/new"
-                        className="inline-flex items-center justify-center px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-xl transition-colors shadow-sm"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-xl transition-opacity shadow-sm"
                     >
                         <Plus className="h-5 w-5 mr-1.5" />
                         Add New Product

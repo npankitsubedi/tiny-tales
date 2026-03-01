@@ -13,8 +13,8 @@ export default function AboutPage() {
             <p className="leading-relaxed">
                 We believe that every milestone, no matter how small, deserves to be celebrated with comfort and care. Our clothing is designed using the softest fabrics, ensuring your baby’s delicate skin is always protected. From newborn onesies to comfortable maternity wear for moms-to-be, every piece in our collection is curated with love.
             </p>
-            <div className="bg-amber-50 rounded-2xl p-8 border border-amber-100 my-10">
-                <h2 className="text-xl font-serif text-amber-900 mb-3">Our Mission</h2>
+            <div className="bg-[#EEF4F9] rounded-2xl p-8 border border-[#D1D1D1] my-10">
+                <h2 className="text-xl font-serif text-[#1E293B] mb-3">Our Mission</h2>
                 <p className="text-amber-800">
                     To provide new parents with beautiful, high-quality, and affordable essentials that make the magical journey of parenthood just a little bit smoother.
                 </p>

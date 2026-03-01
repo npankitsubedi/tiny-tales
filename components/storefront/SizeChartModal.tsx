@@ -27,7 +27,7 @@ export default function SizeChartModal({ sizeChart, productTitle }: SizeChartMod
             {/* Trigger Link */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-700 underline underline-offset-2 font-medium transition-colors"
+                className="flex items-center gap-1.5 text-sm text-[#2D5068] hover:text-[#1E293B] underline underline-offset-2 font-medium transition-colors"
                 aria-label="Open size guide"
             >
                 <Ruler className="w-3.5 h-3.5" aria-hidden="true" />
@@ -75,12 +75,12 @@ export default function SizeChartModal({ sizeChart, productTitle }: SizeChartMod
                             <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                     <thead>
-                                        <tr className="bg-amber-50 border-b border-amber-100">
-                                            <th className="text-left px-5 py-3 text-xs uppercase tracking-wider text-amber-700 font-bold">Size</th>
-                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-amber-700 font-bold">Age Range</th>
-                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-amber-700 font-bold">Chest (cm)</th>
-                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-amber-700 font-bold">Waist (cm)</th>
-                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-amber-700 font-bold">Length (cm)</th>
+                                        <tr className="bg-[#EEF4F9] border-b border-[#D1D1D1]">
+                                            <th className="text-left px-5 py-3 text-xs uppercase tracking-wider text-[#2D5068] font-bold">Size</th>
+                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-[#2D5068] font-bold">Age Range</th>
+                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-[#2D5068] font-bold">Chest (cm)</th>
+                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-[#2D5068] font-bold">Waist (cm)</th>
+                                            <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-[#2D5068] font-bold">Length (cm)</th>
                                         </tr>
                                     </thead>
                                     <tbody>

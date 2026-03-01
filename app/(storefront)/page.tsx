@@ -47,18 +47,18 @@ export default async function StorefrontHomePage() {
             {/* ─── Hero Section ─── */}
             <section className="relative bg-gradient-to-br from-[#FFF8F0] via-[#FFF1E6] to-[#FDEEE8] min-h-[85vh] flex items-center">
                 {/* Decorative blobs */}
-                <div className="absolute top-20 right-10 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-20 right-10 w-96 h-96 bg-[#D1D9E6]/30 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute bottom-10 left-20 w-72 h-72 bg-rose-200/30 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center gap-12">
                     {/* Text */}
                     <div className="flex-1 text-center md:text-left">
-                        <span className="inline-block text-xs font-bold tracking-widest text-amber-600 uppercase bg-amber-100 px-3 py-1 rounded-full mb-6">
+                        <span className="inline-block text-xs font-bold tracking-widest text-[#2D5068] uppercase bg-[#D9E9F2] px-3 py-1 rounded-full mb-6">
                             Nepal's #1 Baby Boutique
                         </span>
                         <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-slate-800 leading-tight mb-6">
                             Dress your little one{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-rose-500">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4F9]0 to-[#F5F5F5]0">
                                 with love.
                             </span>
                         </h1>
@@ -67,7 +67,7 @@ export default async function StorefrontHomePage() {
                         </p>
                         <div className="flex gap-4 justify-center md:justify-start flex-wrap">
                             <Link href="/shop?category=NEWBORN">
-                                <button className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-8 py-4 rounded-full transition-all shadow-lg shadow-amber-200 hover:shadow-amber-300 hover:-translate-y-0.5 text-base">
+                                <button className="inline-flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground font-semibold px-8 py-4 rounded-full transition-all shadow-lg hover:-translate-y-0.5 text-base">
                                     Shop Newborn Essentials <ArrowRight className="w-4 h-4" />
                                 </button>
                             </Link>
@@ -108,14 +108,14 @@ export default async function StorefrontHomePage() {
             </section>
 
             {/* ─── Best Sellers ─── */}
-            <section className="py-20 bg-[#FDFBF7]">
+            <section className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-end justify-between mb-10">
                         <div>
-                            <p className="text-xs font-bold tracking-widest text-amber-600 uppercase mb-2">Our Collection</p>
+                            <p className="text-xs font-bold tracking-widest text-[#2D5068] uppercase mb-2">Our Collection</p>
                             <h2 className="font-serif text-3xl md:text-4xl text-slate-800">Best Sellers</h2>
                         </div>
-                        <Link href="/shop" className="text-sm font-semibold text-amber-700 hover:text-amber-900 flex items-center gap-1 transition-colors">
+                        <Link href="/shop" className="text-sm font-semibold text-[#2D5068] hover:text-[#1E293B] flex items-center gap-1 transition-colors">
                             View All <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -141,8 +141,8 @@ export default async function StorefrontHomePage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {TRUST_BADGES.map(({ icon: Icon, label, desc }) => (
                             <div key={label} className="flex flex-col items-center text-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
-                                    <Icon className="w-6 h-6 text-amber-600" />
+                                <div className="w-12 h-12 rounded-2xl bg-[#EEF4F9] flex items-center justify-center">
+                                    <Icon className="w-6 h-6 text-[#2D5068]" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-slate-800 text-sm">{label}</p>

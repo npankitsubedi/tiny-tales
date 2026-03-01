@@ -25,7 +25,7 @@ async function verifyAccountsAccess() {
     }
 
     const role = session.user.role as string
-    if (role !== "SUPERADMIN" && role !== "ACCOUNTS_ADMIN") {
+    if (role !== "SUPERADMIN") {
         redirect("/unauthorized")
     }
 }
@@ -79,7 +79,7 @@ export default async function AccountsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="p-3 bg-teal-50 text-teal-600 rounded-xl">
+                        <div className="p-3 bg-[#EEF4F9] text-[#2D5068] rounded-xl">
                             <TrendingUp className="h-6 w-6" />
                         </div>
                         <div>
@@ -146,12 +146,12 @@ export default async function AccountsPage() {
                                             <td className="px-6 py-4 font-medium text-slate-700">{inv.invoiceNumber}</td>
                                             <td className="px-6 py-4 text-slate-500 text-sm">{inv.createdAt.toLocaleDateString()}</td>
                                             <td className="px-6 py-4 font-medium">${inv.amountDue ? inv.amountDue.toString() : "0"}</td>
-                                            <td className="px-6 py-4 text-teal-600 font-medium text-sm">+${inv.taxAmount ? inv.taxAmount.toString() : "0"}</td>
+                                            <td className="px-6 py-4 text-[#2D5068] font-medium text-sm">+${inv.taxAmount ? inv.taxAmount.toString() : "0"}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${inv.status === InvoiceStatus.PAID ? 'bg-emerald-100 text-emerald-700' :
                                                     inv.status === InvoiceStatus.OVERDUE ? 'bg-red-100 text-red-700' :
                                                         inv.status === InvoiceStatus.CANCELLED ? 'bg-slate-100 text-slate-700' :
-                                                            'bg-amber-100 text-amber-700'
+                                                            'bg-[#D9E9F2] text-[#2D5068]'
                                                     }`}>
                                                     {inv.status}
                                                 </span>

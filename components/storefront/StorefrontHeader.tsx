@@ -43,21 +43,21 @@ export default function StorefrontHeader() {
   const Logo = () => (
     <Link
       href="/"
-      className="flex items-center gap-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-xl"
+      className="flex items-center gap-2 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8D9E6] rounded-xl"
       aria-label="Tiny Tales — Home"
     >
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-rose-400 flex items-center justify-center shadow-sm">
+      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C8D9E6] to-[#A8BDD0] flex items-center justify-center shadow-sm">
         <Heart className="w-4 h-4 text-white fill-white" aria-hidden="true" />
       </div>
       <span className="font-serif text-xl text-slate-800 leading-none tracking-tight">
-        Tiny <span className="text-teal-600">Tales</span>
+        Tiny <span className="text-[#2D5068]">Tales</span>
       </span>
     </Link>
   )
 
   return (
     <>
-      <header className={`sticky top-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-md border-b transition-all duration-300 ${scrolled ? "border-amber-100 shadow-sm" : "border-transparent"}`}>
+      <header className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b transition-all duration-300 ${scrolled ? "border-[#D1D1D1] shadow-sm" : "border-transparent"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
 
           <Logo />
@@ -66,7 +66,7 @@ export default function StorefrontHeader() {
           <nav className="hidden md:flex items-center gap-0.5" aria-label="Main navigation">
             {NAV_LINKS.map(link => (
               <Link key={link.href} href={link.href}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all duration-200">
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#2D5068] hover:bg-[#EEF4F9] rounded-full transition-all duration-200">
                 {link.label}
               </Link>
             ))}
@@ -77,7 +77,7 @@ export default function StorefrontHeader() {
             {/* Admin Dashboard — only for SUPERADMIN */}
             {isAdmin && (
               <Link href="/admin/sales"
-                className="hidden md:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-full transition-all"
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-[#1E293B] bg-[#EEF4F9] hover:bg-[#D9E9F2] border border-[#C8D9E6] rounded-full transition-all"
                 aria-label="Admin Dashboard">
                 <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
                 Admin
@@ -88,14 +88,14 @@ export default function StorefrontHeader() {
             {status !== "loading" && (
               isLoggedIn ? (
                 <Link href="/account"
-                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-amber-700 hover:bg-amber-50 rounded-full transition-all"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-[#2D5068] hover:bg-[#EEF4F9] rounded-full transition-all"
                   aria-label="My account">
                   <User className="w-4 h-4" aria-hidden="true" />
                   {session.user?.name?.split(" ")[0] || "Account"}
                 </Link>
               ) : (
                 <Link href="/login"
-                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-50 rounded-full transition-all"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-[#2D5068] hover:bg-[#EEF4F9] rounded-full transition-all"
                   aria-label="Sign in">
                   <LogIn className="w-4 h-4" aria-hidden="true" />
                   Login
@@ -105,9 +105,9 @@ export default function StorefrontHeader() {
 
             {/* Cart */}
             <button onClick={() => setDrawerOpen(true)}
-              className="relative flex items-center justify-center w-11 h-11 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="relative flex items-center justify-center w-11 h-11 bg-[#EEF4F9] hover:bg-[#D9E9F2] rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8D9E6]"
               aria-label={`Open cart${cartCount > 0 ? ` — ${cartCount} items` : ""}`}>
-              <ShoppingBag className="w-5 h-5 text-amber-700" aria-hidden="true" />
+              <ShoppingBag className="w-5 h-5 text-[#2D5068]" aria-hidden="true" />
               <AnimatePresence>
                 {cartCount > 0 && (
                   <motion.span key="badge"
@@ -147,13 +147,13 @@ export default function StorefrontHeader() {
             <motion.div id="mobile-menu"
               initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="overflow-hidden border-t border-amber-50 bg-[#FDFBF7] md:hidden"
+              className="overflow-hidden border-t border-amber-50 bg-white md:hidden"
               role="navigation" aria-label="Mobile navigation">
               <nav className="px-4 py-4 space-y-1">
                 {NAV_LINKS.map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center px-4 py-3 text-base font-semibold text-slate-700 hover:text-amber-700 hover:bg-amber-50 rounded-2xl transition-all">
+                    className="flex items-center px-4 py-3 text-base font-semibold text-slate-700 hover:text-[#2D5068] hover:bg-[#EEF4F9] rounded-2xl transition-all">
                     {link.label}
                   </Link>
                 ))}
@@ -161,14 +161,14 @@ export default function StorefrontHeader() {
                 <div className="pt-2 border-t border-slate-100 space-y-1">
                   {isAdmin && (
                     <Link href="/admin/sales" onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-base font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-2xl transition-all">
+                      className="flex items-center gap-2 px-4 py-3 text-base font-bold text-[#1E293B] bg-[#EEF4F9] hover:bg-[#D9E9F2] rounded-2xl transition-all">
                       <LayoutDashboard className="w-4 h-4" aria-hidden="true" /> Admin Dashboard
                     </Link>
                   )}
                   {isLoggedIn ? (
                     <>
                       <Link href="/account" onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-amber-50 rounded-2xl transition-all">
+                        className="flex items-center gap-2 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-[#EEF4F9] rounded-2xl transition-all">
                         <User className="w-4 h-4" aria-hidden="true" />
                         {session?.user?.name?.split(" ")[0] || "Account"}
                       </Link>
@@ -179,7 +179,7 @@ export default function StorefrontHeader() {
                     </>
                   ) : (
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-base font-semibold text-amber-700 hover:bg-amber-50 rounded-2xl transition-all">
+                      className="flex items-center gap-2 px-4 py-3 text-base font-semibold text-[#2D5068] hover:bg-[#EEF4F9] rounded-2xl transition-all">
                       <LogIn className="w-4 h-4" aria-hidden="true" /> Sign In
                     </Link>
                   )}

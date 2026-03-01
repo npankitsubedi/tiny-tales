@@ -14,7 +14,7 @@ export const metadata = {
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
     return (
         <StorefrontProviders>
-            <div className="min-h-screen flex flex-col bg-[#FDFBF7] font-sans text-slate-800">
+            <div className="min-h-screen flex flex-col bg-white font-sans text-slate-800">
                 <StorefrontHeader />
 
                 {/* ─── Page Content ─── */}
@@ -29,11 +29,11 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
                         {/* Brand */}
                         <div>
                             <div className="flex items-center gap-2 mb-4">
-                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center">
+                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-[#F5F5F5]0 flex items-center justify-center">
                                     <Heart className="w-3.5 h-3.5 text-white fill-white" />
                                 </div>
                                 <span className="font-serif text-lg text-white">
-                                    Tiny <span className="text-teal-400">Tales</span>
+                                    Tiny <span className="text-[#C8D9E6]">Tales</span>
                                 </span>
                             </div>
                             <p className="text-sm leading-relaxed text-slate-500 max-w-xs">

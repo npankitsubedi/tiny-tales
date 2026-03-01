@@ -5,10 +5,11 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Plus, Trash2, Loader2, Image as ImageIcon, X, Ruler } from "lucide-react"
-import { createProduct, createProductVariant } from "@/app/actions/inventory"
+import { createProduct, createProductVariant, updateProduct, updateProductVariant } from "@/app/actions/inventory"
 import { ProductCategory } from "@prisma/client"
 import toast from "react-hot-toast"
 import { CldUploadWidget } from "next-cloudinary"
+import { useRouter } from "next/navigation"
 
 const AGE_RANGES = ["0-3 months", "3-6 months", "6-12 months", "12-18 months", "18-24 months", "2-3 years", "3-4 years", "4-5 years", "All ages"]
 
@@ -53,14 +54,18 @@ type CloudinaryResult = {
 
 type MediaItem = { url: string; type: "image" | "video" }
 
-export default function ProductForm() {
+export default function ProductForm({ initialData }: { initialData?: any }) {
+    const isEditMode = !!initialData
+    const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
-    const [showSizeChart, setShowSizeChart] = useState(false)
+    const [mediaItems, setMediaItems] = useState<MediaItem[]>(
+        initialData?.images?.map((url: string) => ({ url, type: url.includes(".mp4") ? "video" : "image" })) || []
+    )
+    const [showSizeChart, setShowSizeChart] = useState(!!initialData?.sizeChartRows?.length)
 
     const form = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema) as any,
-        defaultValues: {
+        defaultValues: initialData || {
             title: "",
             description: "",
             category: ProductCategory.NEWBORN,
@@ -94,9 +99,7 @@ export default function ProductForm() {
         setIsSubmitting(true)
         try {
             const imageUrls = mediaItems.map(m => m.url)
-
-            // 2. Create Product
-            const productResult = await createProduct({
+            const productPayload = {
                 title: data.title,
                 description: data.description,
                 category: data.category,
@@ -108,30 +111,49 @@ export default function ProductForm() {
                 sizeChart: data.sizeChartRows && data.sizeChartRows.length > 0
                     ? data.sizeChartRows
                     : undefined,
-            })
-
-            if (!productResult.success || !productResult.data) {
-                throw new Error(productResult.error || "Failed to create product")
             }
 
-            // 3. Create Variants
+            let productId = initialData?.id
+
+            if (isEditMode && productId) {
+                const productResult = await updateProduct(productId, productPayload)
+                if (!productResult.success) throw new Error(productResult.error || "Failed to update product")
+            } else {
+                const productResult = await createProduct(productPayload)
+                if (!productResult.success || !productResult.data) {
+                    throw new Error(productResult.error || "Failed to create product")
+                }
+                productId = productResult.data.id
+            }
+
+            // 3. Update or Create Variants
             let variantErrors = 0
             for (const variant of data.variants) {
-                const vResult = await createProductVariant({
-                    productId: productResult.data.id,
-                    ...variant,
-                })
-                if (!vResult.success) variantErrors++
+                const existingVariant = isEditMode ? initialData?.variants.find((iv: any) => iv.sku === variant.sku) : null
+
+                if (existingVariant) {
+                    const vResult = await updateProductVariant(existingVariant.id, { ...variant })
+                    if (!vResult.success) variantErrors++
+                } else {
+                    const vResult = await createProductVariant({
+                        productId: productId!,
+                        ...variant,
+                    })
+                    if (!vResult.success) variantErrors++
+                }
             }
 
             if (variantErrors > 0) {
-                toast.error(`Product created but ${variantErrors} variant(s) failed to save.`)
+                toast.error(`Product saved but ${variantErrors} variant(s) failed to process.`)
             } else {
-                toast.success("Product created successfully! 🎉")
+                toast.success(isEditMode ? "Product updated successfully! 🧸" : "Product created successfully! 🧸")
+                if (!isEditMode) {
+                    form.reset()
+                    setMediaItems([])
+                } else {
+                    router.push("/admin/inventory")
+                }
             }
-
-            form.reset()
-            setMediaItems([])
         } catch (err: any) {
             toast.error(err.message || "Something went wrong")
         } finally {
@@ -139,7 +161,7 @@ export default function ProductForm() {
         }
     }
 
-    const inputCls = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400 bg-white placeholder:text-slate-300 transition"
+    const inputCls = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8D9E6] focus:border-[#A8BDD0] bg-white placeholder:text-slate-300 transition"
     const labelCls = "block text-sm font-semibold text-slate-700 mb-1.5"
 
     return (
@@ -208,6 +230,7 @@ export default function ProductForm() {
                         signatureEndpoint="/api/sign-cloudinary-params"
                         options={{
                             maxFiles: 10 - mediaItems.length,
+                            maxFileSize: 50000000,
                             resourceType: "auto",
                             clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "mp4", "mov"],
                             sources: ["local", "url", "camera", "google_drive"],
@@ -221,15 +244,19 @@ export default function ProductForm() {
                                 }])
                             }
                         }}
+                        onError={(error: any) => {
+                            console.error("[CLOUDINARY_ERROR] Upload failed:", error)
+                            toast.error("Upload failed. File might be too large (Max 50MB).")
+                        }}
                     >
                         {({ open, isLoading }) => (
                             <button
                                 type="button"
                                 onClick={() => open()}
                                 disabled={isLoading || mediaItems.length >= 10 || isSubmitting}
-                                className="w-full border-2 border-dashed border-slate-300 hover:border-amber-400 hover:bg-amber-50 disabled:bg-slate-100 disabled:border-slate-200 disabled:cursor-not-allowed rounded-2xl p-8 text-center transition-all group"
+                                className="w-full border-2 border-dashed border-slate-300 hover:border-[#A8BDD0] hover:bg-[#EEF4F9] disabled:bg-slate-100 disabled:border-slate-200 disabled:cursor-not-allowed rounded-2xl p-8 text-center transition-all group"
                             >
-                                <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${mediaItems.length >= 10 ? 'text-slate-300' : 'text-amber-500 group-hover:text-amber-600'}`} aria-hidden="true" />
+                                <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${mediaItems.length >= 10 ? 'text-slate-300' : 'text-amber-500 group-hover:text-[#2D5068]'}`} aria-hidden="true" />
                                 <p className="text-sm font-semibold text-slate-700">Click to upload media</p>
                                 <p className="text-xs text-slate-400 mt-1">Upload up to {10 - mediaItems.length} more files (Images or Video)</p>
                             </button>
@@ -241,7 +268,7 @@ export default function ProductForm() {
                 {mediaItems.length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4">
                         {mediaItems.map((m, i) => (
-                            <div key={i} className="relative group rounded-xl overflow-hidden aspect-square border-2 border-slate-100 hover:border-amber-300 transition-colors bg-black">
+                            <div key={i} className="relative group rounded-xl overflow-hidden aspect-square border-2 border-slate-100 hover:border-[#A8BDD0] transition-colors bg-black">
                                 {m.type === "video"
                                     ? <video src={m.url} className="w-full h-full object-cover" controls={false} />
                                     : <img src={m.url} alt={`Media ${i + 1}`} className="w-full h-full object-cover" />
@@ -254,7 +281,7 @@ export default function ProductForm() {
                                     </span>
                                 )}
                                 {i === 0 && (
-                                    <span className="absolute bottom-2 left-2 bg-amber-500/90 backdrop-blur-md text-white px-2 py-1 rounded text-[10px] font-bold tracking-wider z-10 shadow-sm">
+                                    <span className="absolute bottom-2 left-2 bg-[#C8D9E6]/90 backdrop-blur-md text-slate-800 px-2 py-1 rounded text-[10px] font-bold tracking-wider z-10 shadow-sm">
                                         MAIN
                                     </span>
                                 )}
@@ -281,10 +308,10 @@ export default function ProductForm() {
             <section className="bg-white rounded-2xl border border-slate-100 p-6 space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-slate-700 text-sm uppercase tracking-wider flex items-center gap-2">
-                        <Ruler className="w-4 h-4 text-teal-500" /> Size Chart Builder
+                        <Ruler className="w-4 h-4 text-[#2D5068]" /> Size Chart Builder
                     </h3>
                     <button type="button" onClick={() => setShowSizeChart(v => !v)}
-                        className="text-xs text-teal-600 hover:text-teal-700 font-semibold underline">
+                        className="text-xs text-[#2D5068] hover:text-[#1E293B] font-semibold underline">
                         {showSizeChart ? "Hide" : "Add Size Chart"}
                     </button>
                 </div>
@@ -294,7 +321,7 @@ export default function ProductForm() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-amber-100">
+                                    <tr className="border-b border-[#D1D1D1]">
                                         {["Size Label", "Age Range", "Chest (cm)", "Waist (cm)", "Length (cm)", ""].map(h => (
                                             <th key={h} className="pb-2 text-left text-xs text-slate-400 font-semibold px-2">{h}</th>
                                         ))}
@@ -307,14 +334,14 @@ export default function ProductForm() {
                                                 <td key={key} className="py-1 px-1">
                                                     {key === "ageRange" ? (
                                                         <select {...form.register(`sizeChartRows.${i}.${key}`)}
-                                                            className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-300">
+                                                            className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#C8D9E6]">
                                                             <option value="">—</option>
                                                             {AGE_RANGES.map(r => <option key={r} value={r}>{r}</option>)}
                                                         </select>
                                                     ) : (
                                                         <input {...form.register(`sizeChartRows.${i}.${key}`)}
                                                             placeholder={key === "label" ? "e.g. XS" : "—"}
-                                                            className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-300"
+                                                            className="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#C8D9E6]"
                                                         />
                                                     )}
                                                 </td>
@@ -332,7 +359,7 @@ export default function ProductForm() {
                         </div>
                         <button type="button"
                             onClick={() => appendSize({ label: "", ageRange: "", chest: "", waist: "", length: "" })}
-                            className="flex items-center gap-1.5 text-xs text-teal-600 hover:text-teal-700 font-semibold">
+                            className="flex items-center gap-1.5 text-xs text-[#2D5068] hover:text-[#1E293B] font-semibold">
                             <Plus className="w-3.5 h-3.5" /> Add Row
                         </button>
                     </div>
@@ -359,7 +386,7 @@ export default function ProductForm() {
                                 <input {...form.register(`variants.${index}.sku`)} placeholder="e.g. BUN-1234" className={inputCls} />
                                 <button type="button" onClick={() => generateSku(index)}
                                     title="Auto-generate SKU"
-                                    className="px-2.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-xs font-bold transition-colors shrink-0">
+                                    className="px-2.5 py-2 bg-[#EEF4F9] hover:bg-[#D9E9F2] text-[#2D5068] rounded-xl text-xs font-bold transition-colors shrink-0">
                                     ⚡
                                 </button>
                             </div>
@@ -386,7 +413,7 @@ export default function ProductForm() {
 
                 <button type="button"
                     onClick={() => appendVariant({ size: "", color: "", sku: "", stockCount: 0, lowStockThreshold: 5 })}
-                    className="flex items-center gap-2 text-sm text-amber-700 font-semibold hover:text-amber-800 mt-2">
+                    className="flex items-center gap-2 text-sm text-[#2D5068] font-semibold hover:text-amber-800 mt-2">
                     <Plus className="w-4 h-4" /> Add Variant
                 </button>
             </section>
@@ -395,7 +422,7 @@ export default function ProductForm() {
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold py-4 rounded-2xl text-base transition-all shadow-lg shadow-amber-100 active:scale-[0.99]"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:opacity-90 disabled:opacity-60 text-primary-foreground font-bold py-4 rounded-2xl text-base transition-all shadow-lg active:scale-[0.99]"
             >
                 {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Saving Product...</> : "Create Product"}
             </button>
