@@ -23,7 +23,7 @@ export default function StorefrontHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const isAdmin = session?.user?.role === "SUPERADMIN"
+  const isAdmin = status === "authenticated" && session?.user?.role === "SUPERADMIN"
   const isLoggedIn = status === "authenticated"
 
   // Add shadow when page is scrolled

@@ -14,8 +14,8 @@ async function checkInventoryAuth() {
     }
 
     const role = session.user.role as string
-    if (role !== "SUPERADMIN" && role !== "INVENTORY_ADMIN") {
-        throw new Error("Forbidden: Insufficient privileges")
+    if (role !== "SUPERADMIN") {
+        throw new Error("Unauthorized Access Detected: SUPERADMIN required")
     }
 }
 
@@ -49,8 +49,13 @@ export async function createProduct(data: CreateProductData) {
             }
         })
 
+        const { revalidatePath } = await import("next/cache")
+        revalidatePath("/")
+        revalidatePath("/shop")
+
         return { success: true, data: newProduct }
     } catch (error: any) {
+        console.error("[INVENTORY_ERROR] Failed to create product:", error)
         return { success: false, error: error.message || "Failed to create product" }
     }
 }
@@ -79,8 +84,13 @@ export async function createProductVariant(data: CreateProductVariantData) {
             }
         })
 
+        const { revalidatePath } = await import("next/cache")
+        revalidatePath("/")
+        revalidatePath("/shop")
+
         return { success: true, data: newVariant }
     } catch (error: any) {
+        console.error("[INVENTORY_ERROR] Failed to create variant:", error)
         return { success: false, error: error.message || "Failed to create variant" }
     }
 }
@@ -132,8 +142,13 @@ export async function deductInventory(orderItems: OrderItemInput[]) {
             return updatedVariants
         })
 
+        const { revalidatePath } = await import("next/cache")
+        revalidatePath("/")
+        revalidatePath("/shop")
+
         return { success: true, data: result }
     } catch (error: any) {
+        console.error("[INVENTORY_ERROR] Failed to deduct inventory:", error)
         return { success: false, error: error.message || "Failed to deduct inventory" }
     }
 }
@@ -155,6 +170,7 @@ export async function checkLowStock(variantId: string) {
 
         return { success: true, data: isLow }
     } catch (error: any) {
+        console.error("[INVENTORY_ERROR] Failed to check stock:", error)
         return { success: false, error: error.message || "Failed to check stock" }
     }
 }
@@ -175,9 +191,12 @@ export async function updateStock(variantId: string, newCount: number) {
         // Revalidate the inventory path so UI updates instantly
         const { revalidatePath } = await import("next/cache")
         revalidatePath("/admin/inventory")
+        revalidatePath("/")
+        revalidatePath("/shop")
 
         return { success: true, data: updatedVariant }
     } catch (error: any) {
+        console.error("[INVENTORY_ERROR] Failed to update stock:", error)
         return { success: false, error: error.message || "Failed to update stock" }
     }
 }

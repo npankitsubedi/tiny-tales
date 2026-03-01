@@ -205,7 +205,7 @@ export default function ProductForm() {
 
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
                     <CldUploadWidget
-                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                        signatureEndpoint="/api/sign-cloudinary-params"
                         options={{
                             maxFiles: 10 - mediaItems.length,
                             resourceType: "auto",

@@ -16,9 +16,10 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
 type Params = { id: string }
 
-export async function generateMetadata({ params }: { params: Params }) {
+export async function generateMetadata({ params }: { params: Promise<Params> }) {
+    const resolvedParams = await params
     const product = await db.product.findUnique({
-        where: { id: params.id },
+        where: { id: resolvedParams.id },
         select: { title: true, description: true }
     })
     if (!product) return { title: "Product Not Found" }
@@ -28,10 +29,11 @@ export async function generateMetadata({ params }: { params: Params }) {
     }
 }
 
-export default async function ProductDetailPage({ params }: { params: Params }) {
+export default async function ProductDetailPage({ params }: { params: Promise<Params> }) {
+    const resolvedParams = await params
     // SSR fetch — cogs explicitly excluded via select
     const product = await db.product.findUnique({
-        where: { id: params.id },
+        where: { id: resolvedParams.id },
         select: {
             id: true,
             title: true,
