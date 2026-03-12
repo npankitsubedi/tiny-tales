@@ -10,8 +10,11 @@ export const metadata = {
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions)
-    if (!session || !session.user || !("role" in session.user)) {
+    if (!session || !session.user) {
         redirect("/login")
+    }
+    if ((session.user as { role?: string }).role !== "SUPERADMIN") {
+        redirect("/")
     }
 
     const { id } = await params

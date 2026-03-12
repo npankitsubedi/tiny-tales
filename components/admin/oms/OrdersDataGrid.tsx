@@ -26,7 +26,7 @@ type GridOrder = {
 
 interface OrdersDataGridProps {
     orders: GridOrder[]
-    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<{ success: boolean; error?: string }>
     onCapturePayment: (id: string, method: string) => Promise<{ success: boolean; error?: string }>
 }
 
@@ -59,14 +59,14 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
         if (!action) return
 
         setLoadingId(order.id)
-        const ok = await onStatusChange(order.id, action.next)
-        if (ok) {
+        const result = await onStatusChange(order.id, action.next)
+        if (result.success) {
             setLocalOrders(prev =>
                 prev.map(o => o.id === order.id ? { ...o, status: action.next } : o)
             )
             toast.success(`Advanced to ${action.next.replace(/_/g, " ")}`)
         } else {
-            toast.error("Failed to update status")
+            toast.error(result.error ?? "Failed to update status")
         }
         setLoadingId(null)
     }
@@ -75,10 +75,12 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
         e.stopPropagation()
         if (!confirm("Cancel this order? This cannot be undone.")) return
         setLoadingId(orderId)
-        const ok = await onStatusChange(orderId, "CANCELED")
-        if (ok) {
+        const result = await onStatusChange(orderId, "CANCELED")
+        if (result.success) {
             setLocalOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "CANCELED" } : o))
             toast.success("Order cancelled")
+        } else {
+            toast.error(result.error ?? "Failed to cancel order")
         }
         setLoadingId(null)
     }

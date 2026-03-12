@@ -49,7 +49,7 @@ type OrderDetailProps = {
         amountDue: number
         amountPaid: number
     } | null
-    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<{ success: boolean; error?: string }>
     onCapturePayment: (orderId: string, method: string) => Promise<{ success: boolean; error?: string }>
     onSaveNote: (orderId: string, notes: string) => Promise<{ success: boolean; error?: string }>
 }

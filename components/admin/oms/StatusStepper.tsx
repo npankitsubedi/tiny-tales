@@ -27,8 +27,8 @@ const ADVANCE_MAP: Partial<Record<OrderStatusValue, { next: OrderStatusValue; la
 interface StatusStepperProps {
     orderId: string
     initialStatus: OrderStatusValue
-    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
-    onCancel: (id: string) => Promise<boolean>
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<{ success: boolean; error?: string }>
+    onCancel: (id: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export default function StatusStepper({ orderId, initialStatus, onStatusChange, onCancel }: StatusStepperProps) {
@@ -42,12 +42,12 @@ export default function StatusStepper({ orderId, initialStatus, onStatusChange, 
     const handleAdvance = async () => {
         if (!advance) return
         setIsLoading(true)
-        const ok = await onStatusChange(orderId, advance.next)
-        if (ok) {
+        const result = await onStatusChange(orderId, advance.next)
+        if (result.success) {
             setCurrentStatus(advance.next)
             toast.success(`Status advanced to ${advance.next.replace(/_/g, " ")}`)
         } else {
-            toast.error("Failed to update status")
+            toast.error(result.error ?? "Failed to update status")
         }
         setIsLoading(false)
     }
@@ -55,12 +55,12 @@ export default function StatusStepper({ orderId, initialStatus, onStatusChange, 
     const handleCancel = async () => {
         if (!confirm("Cancel this order? Stock will not be automatically restocked.")) return
         setIsLoading(true)
-        const ok = await onCancel(orderId)
-        if (ok) {
+        const result = await onCancel(orderId)
+        if (result.success) {
             setCurrentStatus("CANCELED")
             toast.success("Order cancelled")
         } else {
-            toast.error("Failed to cancel order")
+            toast.error(result.error ?? "Failed to cancel order")
         }
         setIsLoading(false)
     }

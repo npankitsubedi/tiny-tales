@@ -9,7 +9,6 @@ import { PackageSearch, Users, ShoppingCart, ClockIcon } from "lucide-react"
 import { Suspense } from "react"
 import SearchFilterBar from "@/components/admin/oms/SearchFilterBar"
 import OrdersDataGrid from "@/components/admin/oms/OrdersDataGrid"
-import SalesCommandCenterClient from "@/components/admin/SalesCommandCenterClient"
 
 export const metadata = {
     title: "Order Command Center | Tiny Tales Admin",
@@ -25,8 +24,7 @@ async function verifySalesAccess() {
 // ── Inline Server Actions ──────────────────────────────────────────────────
 async function handleStatusUpdate(orderId: string, newStatus: OrderStatus) {
     "use server"
-    const result = await updateOrderStatus(orderId, newStatus)
-    return result.success
+    return await updateOrderStatus(orderId, newStatus)
 }
 
 async function handleCapturePayment(orderId: string, method: string) {
@@ -89,56 +87,14 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
         db.order.count({ where: { invoice: { status: "UNPAID" } } })
     ])
 
-    const serializedOrders = ordersRaw.map(o => ({
-        id: o.id,
-        customerName: o.customerName,
-        contactPhone: o.contactPhone,
-        shippingAddress: o.shippingAddress,
-        deliveryCity: o.deliveryCity,
-        isInternational: o.isInternational,
-        status: o.status,
-        paymentMethod: o.paymentMethod,
-        adminNotes: o.adminNotes,
-        totalAmount: o.totalAmount.toNumber(),
-        taxAmount: o.taxAmount.toNumber(),
-        createdAt: o.createdAt.toISOString(),
-        orderItems: o.orderItems.map(item => ({
-            id: item.id,
-            quantity: item.quantity,
-            priceAtPurchase: item.priceAtPurchase.toNumber(),
-            variant: {
-                id: item.variant.id,
-                size: item.variant.size,
-                color: item.variant.color,
-                sku: item.variant.sku,
-                stockCount: item.variant.stockCount,
-                lowStockThreshold: item.variant.lowStockThreshold,
-                product: {
-                    id: item.variant.product.id,
-                    title: item.variant.product.title,
-                    category: item.variant.product.category,
-                    images: item.variant.product.images,
-                    isNonReturnable: item.variant.product.isNonReturnable,
-                    cogs: item.variant.product.cogs.toNumber(),
-                    basePrice: item.variant.product.basePrice.toNumber(),
-                }
-            }
-        })),
-        invoice: o.invoice ? {
-            id: o.invoice.id,
-            invoiceNumber: o.invoice.invoiceNumber,
-            status: o.invoice.status as "PAID" | "UNPAID" | "OVERDUE" | "CANCELLED",
-        } : null
-    }))
-
     // Grid-compatible slice (only fields needed by data grid)
-    const gridOrders = serializedOrders.map(o => ({
+    const gridOrders = ordersRaw.map(o => ({
         id: o.id,
         invoiceNumber: o.invoice?.invoiceNumber ?? null,
         customerName: o.customerName,
         contactPhone: o.contactPhone,
         status: o.status,
-        totalAmount: o.totalAmount,
+        totalAmount: o.totalAmount.toNumber(),
         paymentMethod: o.paymentMethod,
         createdAt: o.createdAt.toISOString(),
         invoice: o.invoice ? { id: o.invoice.id, status: o.invoice.status } : null
@@ -222,14 +178,6 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
                         orders={gridOrders}
                         onStatusChange={handleStatusUpdate}
                         onCapturePayment={handleCapturePayment}
-                    />
-                </div>
-
-                {/* ── Legacy Active Pipeline (preserved) ─────────────────── */}
-                <div className="w-full relative">
-                    <SalesCommandCenterClient
-                        initialOrders={serializedOrders}
-                        updateStatusAction={handleStatusUpdate}
                     />
                 </div>
 

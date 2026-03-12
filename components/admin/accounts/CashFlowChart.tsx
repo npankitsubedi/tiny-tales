@@ -68,7 +68,7 @@ export default function CashFlowChart({ data }: CashFlowChartProps) {
                 />
                 <Tooltip
                     contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: number, name: string) => [formatRs(Number(value)), String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
+                    formatter={(value, name) => [formatRs(Number(value ?? 0)), String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
                     labelFormatter={(label) => new Date(label).toLocaleDateString('en-IN', { weekday: 'short', month: 'long', day: 'numeric' })}
                 />
                 <Area

@@ -21,87 +21,83 @@ const expenseSchema = z.object({
  * For simplicity, we are returning lifetime/all-time totals.
  */
 export async function getDashboardKPIs() {
-    await requireSuperadmin();
-    const transactions = await db.transaction.findMany({});
+    try {
+        await requireSuperadmin();
 
-    let totalRevenue = 0;
-    let totalExpenses = 0;
+        const [transactions, purchaseOrders, operations] = await Promise.all([
+            db.transaction.findMany({}),
+            db.purchaseOrder.findMany({}),
+            db.expense.findMany({}),
+        ]);
 
-    for (const t of transactions) {
-        if (t.type === 'INCOME') {
-            totalRevenue += Number(t.amount);
-        } else if (t.type === 'EXPENSE') {
-            totalExpenses += Number(t.amount);
+        let totalRevenue = 0;
+        for (const t of transactions) {
+            if (t.type === 'INCOME') totalRevenue += Number(t.amount);
         }
+
+        // Cost of Goods Sold from Purchase Orders
+        const totalCogs = purchaseOrders.reduce((acc, po) => acc + Number(po.totalAmount), 0);
+
+        // Operating Expenses from Expense table (cash outflows not tied to COGS)
+        const operationsTotal = operations.reduce((acc, op) => acc + Number(op.amount), 0);
+
+        const netProfit = totalRevenue - (totalCogs + operationsTotal);
+
+        return {
+            totalRevenue,
+            totalCogs,
+            operatingExpenses: operationsTotal,
+            netProfit,
+        };
+    } catch (error) {
+        console.error('[ACCOUNTING_ERROR] Failed to fetch dashboard KPIs:', error);
+        return {
+            totalRevenue: 0,
+            totalCogs: 0,
+            operatingExpenses: 0,
+            netProfit: 0,
+        };
     }
-
-    // Cost of Goods Sold is fetched from Purchase Orders
-    const purchaseOrders = await db.purchaseOrder.findMany({});
-    const totalCogs = purchaseOrders.reduce((acc, po) => acc + Number(po.totalAmount), 0);
-
-    // We could also add Expenses directly from Expense table, but Transaction should ideally reflect actual cash flow.
-    // For safety, let's treat Operations explicitly. Assuming operating expenses are logged in Expense:
-    const operations = await db.expense.findMany({});
-    const operationsTotal = operations.reduce((acc, op) => acc + Number(op.amount), 0);
-
-    // Actually, wait, let's look at the instruction:
-    // Operating Expenses (Rs.)
-    // Total Cost of Goods / Purchases (Rs.)
-    // Net Profit: Revenue - (COGS + Operating Expenses)
-
-    // Calculate Net Profit
-    const netProfit = totalRevenue - (totalCogs + operationsTotal);
-
-    return {
-        totalRevenue,
-        totalCogs,
-        operatingExpenses: operationsTotal,
-        netProfit,
-    };
 }
 
 /**
  * Helper to fetch last 30 days cash flow.
  */
 export async function getCashFlowData() {
-    await requireSuperadmin();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    try {
+        await requireSuperadmin();
 
-    const transactions = await db.transaction.findMany({
-        where: {
-            createdAt: { gte: thirtyDaysAgo }
-        },
-        orderBy: { createdAt: 'asc' }
-    });
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Aggregate by day
-    const dailyData: Record<string, { income: number; expense: number }> = {};
+        const transactions = await db.transaction.findMany({
+            where: { createdAt: { gte: thirtyDaysAgo } },
+            orderBy: { createdAt: 'asc' },
+        });
 
-    for (const t of transactions) {
-        // YYYY-MM-DD
-        const day = t.createdAt.toISOString().split('T')[0];
-        if (!dailyData[day]) {
-            dailyData[day] = { income: 0, expense: 0 };
+        // Aggregate by YYYY-MM-DD day key
+        const dailyData: Record<string, { income: number; expense: number }> = {};
+
+        for (const t of transactions) {
+            const day = t.createdAt.toISOString().split('T')[0];
+            if (!dailyData[day]) dailyData[day] = { income: 0, expense: 0 };
+
+            if (t.type === 'INCOME') {
+                dailyData[day].income += Number(t.amount);
+            } else {
+                dailyData[day].expense += Number(t.amount);
+            }
         }
 
-        if (t.type === 'INCOME') {
-            dailyData[day].income += Number(t.amount);
-        } else {
-            dailyData[day].expense += Number(t.amount);
-        }
+        const chartData = Object.entries(dailyData)
+            .map(([date, data]) => ({ date, income: data.income, expense: data.expense }))
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        return chartData;
+    } catch (error) {
+        console.error('[ACCOUNTING_ERROR] Failed to fetch cash flow data:', error);
+        return [];
     }
-
-    const chartData = Object.entries(dailyData).map(([date, data]) => ({
-        date,
-        income: data.income,
-        expense: data.expense,
-    }));
-
-    // Sort chronologically just to be sure
-    chartData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    return chartData;
 }
 
 export async function recordExpense(formData: unknown) {

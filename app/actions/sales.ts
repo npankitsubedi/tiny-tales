@@ -230,21 +230,22 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
 
         if (!order) throw new Error("Order not found")
 
-        // If returned, invoke RESTOCK logic
-        if (newStatus === OrderStatus.RETURNED && order.status !== OrderStatus.RETURNED) {
-            await db.$transaction(async (tx) => {
+        // Execute restock + status update atomically so both succeed or both fail
+        const updatedOrder = await db.$transaction(async (tx) => {
+            // If returning, restock all items first (within the same transaction)
+            if (newStatus === OrderStatus.RETURNED && order.status !== OrderStatus.RETURNED) {
                 for (const item of order.orderItems) {
                     await tx.productVariant.update({
                         where: { id: item.variantId },
                         data: { stockCount: { increment: item.quantity } }
                     })
                 }
-            })
-        }
+            }
 
-        const updatedOrder = await db.order.update({
-            where: { id: orderId },
-            data: { status: newStatus }
+            return tx.order.update({
+                where: { id: orderId },
+                data: { status: newStatus }
+            })
         })
 
         // --- Transactional Email Trigger ---

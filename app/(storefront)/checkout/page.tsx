@@ -82,12 +82,12 @@ export default function CheckoutPage() {
             if (data.paymentMethod === "COD" || data.paymentMethod === "BANK") {
                 setProcessingStep("Placing your order…")
                 const result = await placeOrder(data)
-                if (result.success && result.data) {
-                    clearCart()
-                    router.push(`/checkout/success?orderId=${result.data.order.id}`)
-                } else {
+                if (!result.success) {
                     toast.error(result.error || "Failed to place order.")
+                    return
                 }
+                clearCart()
+                router.push(`/checkout/success?orderId=${result.data.order.id}`)
                 return
             }
 
@@ -95,10 +95,11 @@ export default function CheckoutPage() {
             if (data.paymentMethod === "ESEWA") {
                 setProcessingStep("Preparing eSewa payment…")
                 const orderResult = await placeOrder(data)
-                if (!orderResult.success || !orderResult.data) {
+                if (!orderResult.success) {
                     toast.error(orderResult.error || "Could not create order.")
                     return
                 }
+                if (!orderResult.data) return
                 const orderId = orderResult.data.order.id
                 const esewaResult = await generateEsewaPayload(orderId, total)
                 if (!esewaResult.success) {
@@ -126,10 +127,11 @@ export default function CheckoutPage() {
             if (data.paymentMethod === "KHALTI") {
                 setProcessingStep("Connecting to Khalti…")
                 const orderResult = await placeOrder(data)
-                if (!orderResult.success || !orderResult.data) {
+                if (!orderResult.success) {
                     toast.error(orderResult.error || "Could not create order.")
                     return
                 }
+                if (!orderResult.data) return
                 const orderId = orderResult.data.order.id
                 const khaltiResult = await initiateKhaltiPayment(
                     orderId,

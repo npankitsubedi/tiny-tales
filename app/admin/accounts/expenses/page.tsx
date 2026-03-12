@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import ExpenseTable from '@/components/admin/accounts/ExpenseTable';
 import { getExpenseTransactions } from '@/app/actions/accounting';
+import { requireSuperadmin } from '@/lib/authz';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -8,7 +9,8 @@ export const metadata = {
 }
 
 export default async function ExpensesLedgerPage() {
-    // Fetch expenses with vendor relation safely
+    await requireSuperadmin();
+
     const expenses = await getExpenseTransactions();
 
     const vendors = await db.vendor.findMany({

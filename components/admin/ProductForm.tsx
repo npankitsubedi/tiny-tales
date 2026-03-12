@@ -120,9 +120,10 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 if (!productResult.success) throw new Error(productResult.error || "Failed to update product")
             } else {
                 const productResult = await createProduct(productPayload)
-                if (!productResult.success || !productResult.data) {
+                if (!productResult.success) {
                     throw new Error(productResult.error || "Failed to create product")
                 }
+                if (!productResult.data) return
                 productId = productResult.data.id
             }
 

@@ -17,10 +17,10 @@ const SORT_OPTIONS = [
 
 const CATEGORIES = Object.values(ProductCategory)
 
-type SearchParams = { category?: string; sort?: string }
+type SearchParams = Promise<{ category?: string; sort?: string }>
 
 export default async function ShopPage({ searchParams }: { searchParams: SearchParams }) {
-    const { category, sort } = searchParams
+    const { category, sort } = await searchParams
 
     const validCategory = CATEGORIES.includes(category as ProductCategory)
         ? (category as ProductCategory)

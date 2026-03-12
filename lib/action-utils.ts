@@ -19,7 +19,7 @@ export function actionSuccess<T = void>(
         return { success: true, message } as ActionResult<T>
     }
 
-    return { success: true, data, message }
+    return { success: true, data, message } as ActionResult<T>
 }
 
 export function actionError(error: unknown, fallback: string): ActionFailure {

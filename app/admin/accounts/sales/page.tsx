@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import SalesTable from '@/components/admin/accounts/SalesTable';
 import { getIncomeTransactions } from '@/app/actions/accounting';
+import { requireSuperadmin } from '@/lib/authz';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -8,7 +9,8 @@ export const metadata = {
 }
 
 export default async function SalesLedgerPage() {
-    // Fetch INCOME transactions safely mapped
+    await requireSuperadmin();
+
     const transactions = await getIncomeTransactions();
 
     // Extract reference IDs that might be Order IDs

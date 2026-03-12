@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as any).role !== "SUPERADMIN") redirect("/")
+    if (!session?.user || (session.user as { role?: string }).role !== "SUPERADMIN") redirect("/")
 
     const { id } = await params
 
@@ -106,8 +106,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     // ── Inline Server Actions ─────────────────────────────────────────────
     const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
         "use server"
-        const result = await updateOrderStatus(orderId, newStatus)
-        return result.success
+        return await updateOrderStatus(orderId, newStatus)
     }
 
     const handleCapturePayment = async (orderId: string, method: string) => {
