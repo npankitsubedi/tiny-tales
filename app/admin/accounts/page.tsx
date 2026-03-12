@@ -1,170 +1,142 @@
-import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import { getSalesAnalytics } from "@/app/actions/sales"
-import ExportButton from "@/components/admin/ExportButton"
-import {
-    TrendingUp,
-    Wallet,
-    Receipt,
-    FileText
-} from "lucide-react"
-import { InvoiceStatus } from "@prisma/client"
+import { getDashboardKPIs, getCashFlowData } from '@/app/actions/accounting';
+import { ShoppingCart, TrendingDown, TrendingUp, PiggyBank, ArrowRight } from 'lucide-react';
+import CashFlowChart from '@/components/admin/accounts/CashFlowChart';
+import Link from 'next/link';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
 export const metadata = {
     title: "Accounts Dashboard | Tiny Tales Admin",
-    description: "Financial aggregates and active standard Nepali invoices."
+    description: "Financial aggregates and cash flow."
+}
+
+function formatCurrency(amount: number) {
+    return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 async function verifyAccountsAccess() {
     const session = await getServerSession(authOptions)
-
     if (!session || !session.user || !("role" in session.user)) {
         redirect("/login")
     }
-
     const role = session.user.role as string
     if (role !== "SUPERADMIN") {
         redirect("/unauthorized")
     }
 }
 
-export default async function AccountsPage() {
-    await verifyAccountsAccess()
+export default async function AccountsDashboardPage() {
+    await verifyAccountsAccess();
+    const kpis = await getDashboardKPIs();
+    const rawChartData = await getCashFlowData();
 
-    const analyticsReq = await getSalesAnalytics()
-    const stats = analyticsReq.success && analyticsReq.data
-        ? analyticsReq.data
-        : { revenue: 0, cogs: 0, grossProfit: 0, orderCount: 0 }
+    // Convert raw chart data to ensure no Decimals leak to client
+    const chartData = rawChartData.map(d => ({
+        date: d.date,
+        income: Number(d.income),
+        expense: Number(d.expense)
+    }));
 
-    // Fetch all recent invoices exclusively limiting the schema scope
-    const recentInvoices = await db.invoice.findMany({
-        take: 50,
-        orderBy: { createdAt: 'desc' },
-        include: {
-            order: {
-                select: {
-                    paymentMethod: true,
-                    status: true
-                }
-            }
-        }
-    })
-
-    // Format explicitly for the CSV component avoiding deeply nested object strings 
-    const exportableInvoiceData = recentInvoices.map(inv => ({
-        InvoiceID: inv.invoiceNumber,
-        Date: inv.createdAt.toISOString().split('T')[0],
-        Status: inv.status,
-        PaymentMethod: inv.order.paymentMethod,
-        TotalBilled: "Rs. " + (inv.amountDue ? inv.amountDue.toString() : "0"),
-        TotalTax: "Rs. " + (inv.taxAmount ? inv.taxAmount.toString() : "0")
-    }))
+    const cards = [
+        {
+            title: 'Total Revenue',
+            value: kpis.totalRevenue,
+            icon: TrendingUp,
+            iconBg: 'bg-emerald-100',
+            iconColor: 'text-emerald-600',
+        },
+        {
+            title: 'Total COGS / Purchases',
+            value: kpis.totalCogs,
+            icon: ShoppingCart,
+            iconBg: 'bg-rose-100',
+            iconColor: 'text-rose-600',
+        },
+        {
+            title: 'Operating Expenses',
+            value: kpis.operatingExpenses,
+            icon: TrendingDown,
+            iconBg: 'bg-amber-100',
+            iconColor: 'text-amber-600',
+        },
+        {
+            title: 'Net Profit',
+            value: kpis.netProfit,
+            icon: PiggyBank,
+            iconBg: 'bg-orange-100',
+            iconColor: 'text-orange-600',
+            isHighlight: true,
+        },
+    ];
 
     return (
-        <div className="min-h-screen bg-slate-50/50 p-6 md:p-12 font-sans text-slate-800">
-            <div className="max-w-7xl mx-auto space-y-8">
-
-                {/* Header Section */}
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
-                    <div>
-                        <h1 className="text-3xl font-serif text-slate-800 tracking-tight">Accounts & Finance</h1>
-                        <p className="text-slate-500 mt-1">Total revenue indexing and active invoice processing. <span className="font-medium text-slate-600">(Current Month)</span></p>
-                    </div>
-                    <ExportButton data={exportableInvoiceData} />
-                </header>
-
-                {/* Financial KPIs */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="p-3 bg-[#EEF4F9] text-[#2D5068] rounded-xl">
-                            <TrendingUp className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-slate-500 mb-1">Total Revenue</p>
-                            <h3 className="text-2xl font-bold text-slate-800">${stats.revenue.toFixed(2)}</h3>
-                            <p className="text-xs text-slate-400 mt-1">Across {stats.orderCount} complete orders</p>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="p-3 bg-red-50 text-red-500 rounded-xl">
-                            <Receipt className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-slate-500 mb-1">Expenses (COGS)</p>
-                            <h3 className="text-2xl font-bold text-slate-800">${stats.cogs.toFixed(2)}</h3>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-start gap-4">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                            <Wallet className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-slate-500 mb-1">Gross Profit Margin</p>
-                            <h3 className="text-2xl font-bold text-slate-800">${stats.grossProfit.toFixed(2)}</h3>
-                            <p className="text-xs text-emerald-600 font-medium mt-1">
-                                {stats.revenue > 0 ? ((stats.grossProfit / stats.revenue) * 100).toFixed(1) + "% Margin" : "N/A"}
-                            </p>
-                        </div>
-                    </div>
+        <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between mb-2">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">Financial Cockpit</h1>
+                    <p className="text-sm text-slate-500 mt-1">Real-time overview of revenue, operations, and cash flow.</p>
                 </div>
-
-                {/* Invoices Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-slate-800 tracking-tight flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-slate-400" />
-                            Recent Invoices
-                        </h2>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse whitespace-nowrap">
-                            <thead>
-                                <tr className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500 font-medium">
-                                    <th className="px-6 py-4">Invoice #</th>
-                                    <th className="px-6 py-4">Date</th>
-                                    <th className="px-6 py-4">Amount Due</th>
-                                    <th className="px-6 py-4">13% VAT</th>
-                                    <th className="px-6 py-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {recentInvoices.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-sm">
-                                            No invoices have been generated yet.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    recentInvoices.map((inv) => (
-                                        <tr key={inv.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4 font-medium text-slate-700">{inv.invoiceNumber}</td>
-                                            <td className="px-6 py-4 text-slate-500 text-sm">{inv.createdAt.toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 font-medium">${inv.amountDue ? inv.amountDue.toString() : "0"}</td>
-                                            <td className="px-6 py-4 text-[#2D5068] font-medium text-sm">+${inv.taxAmount ? inv.taxAmount.toString() : "0"}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${inv.status === InvoiceStatus.PAID ? 'bg-emerald-100 text-emerald-700' :
-                                                    inv.status === InvoiceStatus.OVERDUE ? 'bg-red-100 text-red-700' :
-                                                        inv.status === InvoiceStatus.CANCELLED ? 'bg-slate-100 text-slate-700' :
-                                                            'bg-[#D9E9F2] text-[#2D5068]'
-                                                    }`}>
-                                                    {inv.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="flex gap-3">
+                    <Link
+                        href="/admin/accounts/sales"
+                        className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm flex items-center gap-2"
+                    >
+                        Sales Ledger <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link
+                        href="/admin/accounts/expenses"
+                        className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 transition-colors shadow-sm flex items-center gap-2"
+                    >
+                        Record Expenses <ArrowRight className="w-4 h-4" />
+                    </Link>
                 </div>
+            </div>
 
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {cards.map((card, idx) => {
+                    const Icon = card.icon;
+                    return (
+                        <div
+                            key={idx}
+                            className={`relative overflow-hidden flex items-center p-5 bg-white border rounded-2xl shadow-sm transition-all hover:shadow-md ${card.isHighlight ? 'border-orange-200 ring-1 ring-orange-100' : 'border-slate-200'}`}
+                        >
+                            {card.isHighlight && (
+                                <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                    <Icon className="w-24 h-24 text-orange-600" />
+                                </div>
+                            )}
+
+                            <div className="flex flex-col gap-1 z-10 w-full">
+                                <div className="flex justify-between items-center w-full mb-2">
+                                    <p className={`text-sm font-medium ${card.isHighlight ? 'text-orange-800' : 'text-slate-500'}`}>
+                                        {card.title}
+                                    </p>
+                                    <div className={`p-2 rounded-lg ${card.iconBg}`}>
+                                        <Icon className={`w-5 h-5 ${card.iconColor}`} />
+                                    </div>
+                                </div>
+                                <p className={`text-3xl font-bold tracking-tight ${card.isHighlight ? 'text-orange-600' : 'text-slate-900'}`}>
+                                    {formatCurrency(card.value)}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Cash Flow Chart Area */}
+            <div className="bg-white border text-orange-600 border-slate-200 rounded-2xl shadow-sm p-6 mt-2 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-rose-500"></div>
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-lg font-semibold text-slate-900">Cash Flow (Last 30 Days)</h2>
+                </div>
+                <div className="h-[400px] w-full">
+                    <CashFlowChart data={chartData} />
+                </div>
             </div>
         </div>
-    )
+    );
 }

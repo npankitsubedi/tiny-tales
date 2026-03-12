@@ -33,6 +33,8 @@ export default function AdminSidebar() {
 
     const isActive = (href: string) => {
         if (href === "/admin/dashboard") return pathname === href
+        if (href === "/admin/accounts") return pathname.startsWith("/admin/accounts")
+        if (href === "/admin/sales") return pathname === "/admin/sales"
         return pathname.startsWith(href)
     }
 

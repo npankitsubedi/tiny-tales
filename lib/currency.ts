@@ -1,24 +1,29 @@
 /**
  * Currency formatting utilities for Tiny Tales
- * Standardized to "RS" prefix
+ * All output is hardcoded to "Rs." (Nepalese Rupees) prefix.
+ * Uses manual comma formatting — no Intl.NumberFormat with locale side effects.
  */
 
-/**
- * Format an amount exactly as "RS 1,200.00"
- */
-export function formatRs(amount: number): string {
-    return `RS ${new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(amount)}`
+function addCommas(intPart: string): string {
+    // Standard comma grouping: 1,234,567
+    return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 }
 
 /**
- * Compact display format: "RS 1,200" (no decimals for display cards)
+ * Format an amount as "Rs. 1,200.00"
+ */
+export function formatRs(amount: number): string {
+    const fixed = Math.abs(amount).toFixed(2)
+    const [intPart, decPart] = fixed.split(".")
+    const sign = amount < 0 ? "-" : ""
+    return `${sign}Rs. ${addCommas(intPart)}.${decPart}`
+}
+
+/**
+ * Compact display format: "Rs. 1,200" (no decimals — for stat cards)
  */
 export function formatRsCompact(amount: number): string {
-    return `RS ${new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(amount)}`
+    const rounded = Math.round(Math.abs(amount)).toString()
+    const sign = amount < 0 ? "-" : ""
+    return `${sign}Rs. ${addCommas(rounded)}`
 }

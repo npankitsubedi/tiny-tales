@@ -78,8 +78,11 @@ export const cartTotal = (items: CartItem[]) =>
 export function useCart() {
     const [mounted, setMounted] = useState(false)
     const store = useCartStore()
-
-    useEffect(() => { setMounted(true) }, [])
+    useEffect(() => { 
+        let isMounted = true;
+        if (isMounted) setMounted(true);
+        return () => { isMounted = false; }
+    }, [])
 
     if (!mounted) {
         return {

@@ -324,7 +324,22 @@ export async function capturePayment(orderId: string, paymentMethod: string) {
 }
 
 
-// --- 4. User Cart Retention ---
+// --- 5. Internal Order Notes ---
+export async function saveOrderNote(orderId: string, notes: string) {
+    try {
+        await checkRole(["SUPERADMIN"])
+        await db.order.update({
+            where: { id: orderId },
+            data: { adminNotes: notes.trim() || null }
+        })
+        revalidatePath(`/admin/sales/orders/${orderId}`)
+        return { success: true }
+    } catch (error: any) {
+        return { success: false, error: error.message || "Failed to save note" }
+    }
+}
+
+// --- 6. User Cart Retention ---
 export async function saveCart(userId: string | null, cartData: any) {
     try {
         if (!userId) {
