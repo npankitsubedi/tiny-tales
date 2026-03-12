@@ -14,12 +14,12 @@ const REASON_MESSAGES: Record<string, string> = {
 
 export const metadata = { title: "Payment Failed | Tiny Tales" }
 
-export default function CheckoutFailedPage({
+export default async function CheckoutFailedPage({
     searchParams
 }: {
-    searchParams: { reason?: string }
+    searchParams: Promise<{ reason?: string }>
 }) {
-    const reason = searchParams.reason || "payment_failed"
+    const { reason = "payment_failed" } = await searchParams
     const message = REASON_MESSAGES[reason] || "Something went wrong with your payment."
 
     return (
@@ -50,7 +50,7 @@ export default function CheckoutFailedPage({
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link href="/checkout">
-                        <button className="flex items-center gap-2 bg-[#C8D9E6] hover:bg-[#A8BDD0] text-white font-semibold px-6 py-3 rounded-full transition-all shadow-lg shadow-[#EEF4F9]">
+                        <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3 rounded-full transition-colors shadow-lg shadow-orange-100">
                             <RefreshCw className="w-4 h-4" /> Try Again
                         </button>
                     </Link>

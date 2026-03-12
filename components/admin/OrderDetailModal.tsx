@@ -1,20 +1,36 @@
 "use client"
 
-import { Order, OrderItem, ProductVariant, Product, Invoice } from "@prisma/client"
 import { X, ExternalLink, MapPin, Phone, User, Calendar, MessageCircle, FileText } from "lucide-react"
 import { useEffect } from "react"
 import { format } from "date-fns"
+import { formatRs } from "@/lib/currency"
 
-// Extending the generic payload matching the Server Action Response inclusion
-type ExpandedOrderItem = OrderItem & {
-    variant: ProductVariant & {
-        product: Product
+type ExpandedOrderItem = {
+    id: string
+    quantity: number
+    priceAtPurchase: number
+    variant: {
+        size: string
+        color: string
+        sku: string
+        product: {
+            title: string
+        }
     }
 }
 
-type ExpandedOrder = Order & {
+type ExpandedOrder = {
+    id: string
+    customerName: string | null
+    contactPhone: string | null
+    shippingAddress: string | null
+    isInternational: boolean
+    createdAt: string
+    status: string
+    totalAmount: number
+    taxAmount: number
     orderItems: ExpandedOrderItem[]
-    invoice: Invoice | null
+    invoice: { invoiceNumber: string } | null
 }
 
 interface OrderDetailModalProps {
@@ -157,9 +173,9 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0">
+                                        <div className="text-right shrink-0">
                                         <p className="font-medium text-slate-800 text-sm">
-                                            RS {Number(item.priceAtPurchase).toFixed(2)}
+                                            {formatRs(item.priceAtPurchase)}
                                         </p>
                                         <p className="text-xs font-bold text-slate-400 mt-0.5 bg-slate-100 inline-block px-1.5 rounded">
                                             x{item.quantity}
@@ -186,16 +202,16 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
 
                             <div className="flex justify-between items-center text-slate-300">
                                 <span>Subtotal</span>
-                                <span className="font-medium">${(Number(order.totalAmount) - Number(order.taxAmount)).toFixed(2)}</span>
+                                <span className="font-medium">{formatRs(order.totalAmount - order.taxAmount)}</span>
                             </div>
                             <div className="flex justify-between items-center text-slate-400">
                                 <span>Nepali VAT (13%)</span>
-                                <span className="font-medium">RS {Number(order.taxAmount).toFixed(2)}</span>
+                                <span className="font-medium">{formatRs(order.taxAmount)}</span>
                             </div>
 
                             <div className="pt-3 border-t border-slate-700 flex justify-between items-center mt-2">
                                 <span className="font-medium text-slate-100">Total Charged</span>
-                                <span className="text-xl font-bold text-emerald-400">RS {Number(order.totalAmount).toFixed(2)}</span>
+                                <span className="text-xl font-bold text-emerald-400">{formatRs(order.totalAmount)}</span>
                             </div>
                         </div>
                     </section>

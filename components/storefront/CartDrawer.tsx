@@ -5,6 +5,7 @@ import { useCart } from "@/store/cartStore"
 import { ShoppingBag, Minus, Plus, X, ArrowRight, Tag } from "lucide-react"
 import Link from "next/link"
 import NextImage from "next/image"
+import { formatRs } from "@/lib/currency"
 
 interface CartDrawerProps {
     isOpen: boolean
@@ -109,7 +110,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                                 <Plus className="w-3 h-3" />
                                             </button>
                                         </div>
-                                        <p className="font-bold text-slate-800 text-sm">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                                        <p className="font-bold text-slate-800 text-sm">{formatRs(item.price * item.quantity)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -141,21 +142,21 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between text-slate-500">
                                 <span>Subtotal</span>
-                                <span>Rs. {subtotal.toFixed(2)}</span>
+                                <span>{formatRs(subtotal)}</span>
                             </div>
                             <div className="flex justify-between text-slate-500">
                                 <span>VAT (13%)</span>
-                                <span>Rs. {vat.toFixed(2)}</span>
+                                <span>{formatRs(vat)}</span>
                             </div>
                             <div className="flex justify-between font-bold text-slate-800 text-base border-t border-slate-100 pt-2 mt-2">
                                 <span>Total</span>
-                                <span>Rs. {total.toFixed(2)}</span>
+                                <span>{formatRs(total)}</span>
                             </div>
                         </div>
 
                         {/* CTA */}
                         <Link href="/checkout" onClick={onClose}>
-                            <button className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2">
+                            <button className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2">
                                 Proceed to Checkout <ArrowRight className="w-4 h-4" />
                             </button>
                         </Link>

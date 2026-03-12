@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { X, Save, Edit3 } from 'lucide-react';
 import { updateCustomerProfile } from '@/app/actions/crm';
+import { useRouter } from 'next/navigation';
 
 const editSchema = z.object({
     id: z.string(),
@@ -27,6 +28,7 @@ interface EditCustomerModalProps {
 }
 
 export default function EditCustomerModal({ customer }: EditCustomerModalProps) {
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,7 @@ export default function EditCustomerModal({ customer }: EditCustomerModalProps) 
 
         setIsSubmitting(false);
         setIsOpen(false);
+        router.refresh();
     };
 
     if (!isOpen) {

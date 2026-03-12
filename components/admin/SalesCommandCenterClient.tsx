@@ -1,16 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { OrderStatus } from "@prisma/client"
 import OrderPipeline from "@/components/admin/OrderPipeline"
 import OrderDetailModal from "@/components/admin/OrderDetailModal"
 import { X, Check } from "lucide-react"
 import toast from "react-hot-toast"
 import { capturePayment } from "@/app/actions/sales" // Next.js Server Action
+import { OrderStatusValue } from "@/lib/domain"
 
 interface SalesCommandCenterClientProps {
     initialOrders: any[]
-    updateStatusAction: (id: string, s: OrderStatus) => Promise<boolean>
+    updateStatusAction: (id: string, s: OrderStatusValue) => Promise<boolean>
 }
 
 export default function SalesCommandCenterClient({ initialOrders, updateStatusAction }: SalesCommandCenterClientProps) {

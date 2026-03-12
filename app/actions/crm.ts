@@ -1,24 +1,10 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
+import { actionError, actionSuccess } from "@/lib/action-utils"
+import { requireSuperadmin } from "@/lib/authz"
 import * as z from "zod"
-
-async function checkRole(allowedRoles: string[]) {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user || !("role" in session.user)) {
-        throw new Error("Unauthorized: No session found")
-    }
-
-    const role = session.user.role as string
-    if (!allowedRoles.includes(role)) {
-        throw new Error("Forbidden: Insufficient privileges")
-    }
-    return session.user
-}
 
 const updateCustomerSchema = z.object({
     id: z.string().min(1),
@@ -31,8 +17,7 @@ export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>
 
 export async function updateCustomerProfile(data: UpdateCustomerInput) {
     try {
-        await checkRole(["SUPERADMIN"])
-
+        await requireSuperadmin()
         const parsedData = updateCustomerSchema.parse(data)
 
         const user = await db.user.update({
@@ -47,12 +32,9 @@ export async function updateCustomerProfile(data: UpdateCustomerInput) {
         revalidatePath(`/admin/customers/${parsedData.id}`)
         revalidatePath("/admin/customers")
 
-        return { success: true, data: user }
-
-    } catch (error: any) {
-        if (error instanceof z.ZodError) {
-             return { success: false, error: "Validation failed: " + error.issues[0].message }
-        }
-        return { success: false, error: error.message || "Failed to update customer profile" }
+        return actionSuccess(user)
+    } catch (error) {
+        console.error("[CRM_ERROR] Failed to update customer profile:", error)
+        return actionError(error, "Failed to update customer profile")
     }
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
+import { formatRsCompact } from '@/lib/currency';
 
 export type CustomerRow = {
     id: string;
@@ -16,10 +17,6 @@ export type CustomerRow = {
 
 interface CustomerGridProps {
     customers: CustomerRow[];
-}
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN')}`;
 }
 
 export default function CustomerGrid({ customers }: CustomerGridProps) {
@@ -94,7 +91,7 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <span className="font-bold text-slate-700">
-                                            {formatCurrency(customer.lifetimeValue)}
+                                            {formatRsCompact(customer.lifetimeValue)}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right text-slate-500 font-medium">

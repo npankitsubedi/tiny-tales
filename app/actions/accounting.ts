@@ -2,11 +2,14 @@
 
 import { db } from '@/lib/db';
 import { TransactionType, PaymentMethod } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
+import { actionError, actionSuccess } from '@/lib/action-utils';
+import { requireSuperadmin } from '@/lib/authz';
 import { z } from 'zod';
 
 const expenseSchema = z.object({
     category: z.string().min(1, "Category is required"),
-    amount: z.number().positive("Amount must be positive"),
+    amount: z.coerce.number().positive("Amount must be positive"),
     paymentMethod: z.enum(['CASH', 'FONEPAY', 'CARD', 'BANK']),
     date: z.string().min(1, "Date is required"),
     vendorId: z.string().optional(),
@@ -18,6 +21,7 @@ const expenseSchema = z.object({
  * For simplicity, we are returning lifetime/all-time totals.
  */
 export async function getDashboardKPIs() {
+    await requireSuperadmin();
     const transactions = await db.transaction.findMany({});
 
     let totalRevenue = 0;
@@ -60,6 +64,7 @@ export async function getDashboardKPIs() {
  * Helper to fetch last 30 days cash flow.
  */
 export async function getCashFlowData() {
+    await requireSuperadmin();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -100,40 +105,43 @@ export async function getCashFlowData() {
 }
 
 export async function recordExpense(formData: unknown) {
-    const parsed = expenseSchema.safeParse(formData);
-    if (!parsed.success) {
-        throw new Error(parsed.error.issues[0].message);
+    try {
+        await requireSuperadmin();
+        const data = expenseSchema.parse(formData);
+
+        const result = await db.$transaction(async (tx) => {
+            const expense = await tx.expense.create({
+                data: {
+                    category: data.category,
+                    amount: data.amount,
+                    paymentMethod: data.paymentMethod as PaymentMethod,
+                    date: new Date(data.date),
+                    vendorId: data.vendorId || null,
+                    notes: data.notes,
+                }
+            });
+
+            await tx.transaction.create({
+                data: {
+                    type: TransactionType.EXPENSE,
+                    category: data.category,
+                    amount: data.amount,
+                    paymentMethod: data.paymentMethod as PaymentMethod,
+                    referenceId: expense.id,
+                    createdAt: new Date(data.date),
+                }
+            });
+
+            return { expenseId: expense.id };
+        });
+
+        revalidatePath('/admin/accounts');
+        revalidatePath('/admin/accounts/expenses');
+        return actionSuccess(result);
+    } catch (error) {
+        console.error('[ACCOUNTING_ERROR] Failed to record expense:', error);
+        return actionError(error, 'Failed to record expense');
     }
-    
-    const data = parsed.data;
-
-    return await db.$transaction(async (tx) => {
-        // 1. Create the Expense record
-        const expense = await tx.expense.create({
-            data: {
-                category: data.category,
-                amount: data.amount,
-                paymentMethod: data.paymentMethod as PaymentMethod,
-                date: new Date(data.date),
-                vendorId: data.vendorId || null,
-                notes: data.notes,
-            }
-        });
-
-        // 2. Create the unified Transaction tracking real cash flow out
-        await tx.transaction.create({
-            data: {
-                type: 'EXPENSE',
-                category: data.category,
-                amount: data.amount,
-                paymentMethod: data.paymentMethod as PaymentMethod,
-                referenceId: expense.id,
-                createdAt: new Date(data.date), // Sync the date with the expense date
-            }
-        });
-
-        return { success: true, expenseId: expense.id };
-    });
 }
 
 /**
@@ -141,6 +149,7 @@ export async function recordExpense(formData: unknown) {
  * Safely maps Decimals to numbers.
  */
 export async function getIncomeTransactions() {
+    await requireSuperadmin();
     const transactions = await db.transaction.findMany({
         where: { type: 'INCOME' },
         orderBy: { createdAt: 'desc' },
@@ -161,6 +170,7 @@ export async function getIncomeTransactions() {
  * Retrieves vendor relations and maps Decimals to numbers.
  */
 export async function getExpenseTransactions() {
+    await requireSuperadmin();
     const expenses = await db.expense.findMany({
         include: { vendor: true },
         orderBy: { date: 'desc' },

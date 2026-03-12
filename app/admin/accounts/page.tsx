@@ -5,15 +5,12 @@ import Link from 'next/link';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { formatRs } from '@/lib/currency';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
     title: "Accounts Dashboard | Tiny Tales Admin",
     description: "Financial aggregates and cash flow."
-}
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 async function verifyAccountsAccess() {
@@ -118,8 +115,8 @@ export default async function AccountsDashboardPage() {
                                         <Icon className={`w-5 h-5 ${card.iconColor}`} />
                                     </div>
                                 </div>
-                                <p className={`text-3xl font-bold tracking-tight ${card.isHighlight ? 'text-orange-600' : 'text-slate-900'}`}>
-                                    {formatCurrency(card.value)}
+                                    <p className={`text-3xl font-bold tracking-tight ${card.isHighlight ? 'text-orange-600' : 'text-slate-900'}`}>
+                                    {formatRs(card.value)}
                                 </p>
                             </div>
                         </div>

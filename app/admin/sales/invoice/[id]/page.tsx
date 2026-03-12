@@ -6,11 +6,12 @@
 import { db } from "@/lib/db"
 import { notFound, redirect } from "next/navigation"
 import { formatRs } from "@/lib/currency"
-import { Heart, Printer } from "lucide-react"
+import { Heart } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
+import PrintInvoiceButton from "@/components/admin/PrintInvoiceButton"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -53,12 +54,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
                 <Link href="/admin/sales" className="text-sm text-slate-500 hover:text-slate-700 font-medium">
                     ← Back to Sales
                 </Link>
-                <button
-                    onClick={() => window.print()}
-                    className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-700 transition-all"
-                >
-                    <Printer className="w-4 h-4" /> Print / Save PDF
-                </button>
+                <PrintInvoiceButton />
             </div>
 
             {/* A4 Invoice Body */}

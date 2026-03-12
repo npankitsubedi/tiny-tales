@@ -1,6 +1,7 @@
 'use client';
 
 import { Printer } from 'lucide-react';
+import { formatRs } from '@/lib/currency';
 
 interface SalesRow {
     id: string;
@@ -14,10 +15,6 @@ interface SalesRow {
 
 interface SalesTableProps {
     data: SalesRow[];
-}
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export default function SalesTable({ data }: SalesTableProps) {
@@ -80,7 +77,7 @@ export default function SalesTable({ data }: SalesTableProps) {
                                         {row.paymentMethod.toLowerCase()}
                                     </td>
                                     <td className="px-6 py-3 text-sm font-bold text-slate-900 text-right">
-                                        {formatCurrency(row.amount)}
+                                        {formatRs(row.amount)}
                                     </td>
                                 </tr>
                             ))

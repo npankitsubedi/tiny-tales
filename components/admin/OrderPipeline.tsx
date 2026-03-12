@@ -1,38 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { OrderStatus } from "@prisma/client"
 import { CheckCircle2, Package, Truck, MapPin, XCircle, RefreshCcw, Banknote } from "lucide-react"
 import { formatRs } from "@/lib/currency"
 import toast from "react-hot-toast"
+import { OrderStatusValue } from "@/lib/domain"
 
 type PipelineOrder = {
     id: string
     customerName: string | null
-    totalAmount: string
-    status: OrderStatus
-    createdAt: Date
+    totalAmount: number
+    status: OrderStatusValue
+    createdAt: string
     paymentMethod: string
     invoice?: { status: string } | null
 }
 
 interface OrderPipelineProps {
     initialOrders: PipelineOrder[]
-    onStatusChange: (orderId: string, newStatus: OrderStatus) => Promise<boolean>
+    onStatusChange: (orderId: string, newStatus: OrderStatusValue) => Promise<boolean>
     onOrderClick: (orderId: string) => void
     onCapturePayment: (orderId: string) => void
 }
 
-const STATUS_ORDER: OrderStatus[] = [
-    OrderStatus.PENDING,
-    OrderStatus.CONFIRMED,
-    OrderStatus.PACKED,
-    OrderStatus.SHIPPED,
-    OrderStatus.OUT_FOR_DELIVERY,
-    OrderStatus.DELIVERED
+const STATUS_ORDER: OrderStatusValue[] = [
+    "PENDING",
+    "CONFIRMED",
+    "PACKED",
+    "SHIPPED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED"
 ]
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string, color: string, nextAction?: string, nextStatus?: OrderStatus, icon: any }> = {
+const STATUS_CONFIG: Record<OrderStatusValue, { label: string, color: string, nextAction?: string, nextStatus?: OrderStatusValue, icon: any }> = {
     PENDING: { label: "Pending", color: "bg-amber-100 text-amber-800", nextAction: "Confirm Order", nextStatus: "CONFIRMED", icon: ClockIcon },
     CONFIRMED: { label: "Confirmed", color: "bg-blue-100 text-blue-800", nextAction: "Mark Packed", nextStatus: "PACKED", icon: CheckCircle2 },
     PACKED: { label: "Packed", color: "bg-indigo-100 text-indigo-800", nextAction: "Mark Shipped", nextStatus: "SHIPPED", icon: Package },

@@ -1,6 +1,7 @@
 'use client';
 
 import { ShoppingBag, Receipt } from 'lucide-react';
+import { formatRsCompact } from '@/lib/currency';
 
 export type ActivityItem = {
     id: string;
@@ -13,10 +14,6 @@ export type ActivityItem = {
 
 interface ActivityFeedProps {
     items: ActivityItem[];
-}
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN')}`;
 }
 
 function timeAgo(dateString: string) {
@@ -75,7 +72,7 @@ export default function ActivityFeed({ items }: ActivityFeedProps) {
                                 </div>
                                 <div className="flex flex-col items-end">
                                     <span className={`text-sm font-bold ${isOrder ? 'text-emerald-600' : 'text-slate-700'}`}>
-                                        {isOrder ? '+' : '-'}{formatCurrency(item.amount)}
+                                        {isOrder ? '+' : '-'}{formatRsCompact(item.amount)}
                                     </span>
                                     <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mt-1">
                                         {timeAgo(item.date)}

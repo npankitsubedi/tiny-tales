@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                         <Link href="/admin/inventory/new" className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm">
                             <PackageCheck className="w-4 h-4" /> Add Product
                         </Link>
-                        <Link href="/admin/sales" className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-xl hover:bg-slate-900 transition-colors shadow-sm">
+                        <Link href="/admin/sales" className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 transition-colors shadow-sm">
                             Pending Orders <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>

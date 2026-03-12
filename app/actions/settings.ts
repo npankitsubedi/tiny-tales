@@ -1,24 +1,10 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
+import { actionError, actionSuccess } from "@/lib/action-utils"
+import { requireSuperadmin } from "@/lib/authz"
 import * as z from "zod"
-
-async function checkRole(allowedRoles: string[]) {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user || !("role" in session.user)) {
-        throw new Error("Unauthorized: No session found")
-    }
-
-    const role = session.user.role as string
-    if (!allowedRoles.includes(role)) {
-        throw new Error("Forbidden: Insufficient privileges")
-    }
-    return session.user
-}
 
 const storeDetailsSchema = z.object({
     storeName: z.string().min(2),
@@ -38,7 +24,7 @@ export type FinancialRulesInput = z.infer<typeof financialRulesSchema>
 
 export async function updateStoreDetails(data: StoreDetailsInput) {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
         const parsed = storeDetailsSchema.parse(data)
 
         const settings = await db.storeSettings.upsert({
@@ -59,16 +45,16 @@ export async function updateStoreDetails(data: StoreDetailsInput) {
         })
 
         revalidatePath("/admin/settings")
-        return { success: true, data: settings }
-    } catch (error: any) {
-        if (error instanceof z.ZodError) return { success: false, error: "Validation failed: " + error.issues[0].message }
-        return { success: false, error: error.message || "Failed to update store details" }
+        return actionSuccess(settings)
+    } catch (error) {
+        console.error("[SETTINGS_ERROR] Failed to update store details:", error)
+        return actionError(error, "Failed to update store details")
     }
 }
 
 export async function updateFinancialRules(data: FinancialRulesInput) {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
         const parsed = financialRulesSchema.parse(data)
 
         const settings = await db.storeSettings.upsert({
@@ -86,10 +72,10 @@ export async function updateFinancialRules(data: FinancialRulesInput) {
             }
         })
 
-         revalidatePath("/admin/settings")
-         return { success: true, data: settings }
-    } catch (error: any) {
-        if (error instanceof z.ZodError) return { success: false, error: "Validation failed: " + error.issues[0].message }
-        return { success: false, error: error.message || "Failed to update financial rules" }
+        revalidatePath("/admin/settings")
+        return actionSuccess(settings)
+    } catch (error) {
+        console.error("[SETTINGS_ERROR] Failed to update financial rules:", error)
+        return actionError(error, "Failed to update financial rules")
     }
 }

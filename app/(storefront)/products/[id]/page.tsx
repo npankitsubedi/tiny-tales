@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import VariantSelector from "@/components/storefront/VariantSelector"
 import { ShieldCheck, Droplets, Shirt, Package, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { formatRs } from "@/lib/currency"
 
 const CARE_INSTRUCTIONS = [
     { icon: ShieldCheck, label: "Hypoallergenic", desc: "Tested safe for sensitive newborn skin. No harsh dyes." },
@@ -121,7 +122,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
 
                             <div className="flex items-baseline gap-3 mb-5">
                                 <span className="text-3xl font-bold text-slate-900">
-                                    RS {basePrice.toFixed(2)}
+                                    {formatRs(basePrice)}
                                 </span>
                                 <span className="text-sm text-slate-400">Incl. VAT</span>
                             </div>

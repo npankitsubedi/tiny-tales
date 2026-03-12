@@ -1,24 +1,19 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
+import { actionError, actionSuccess } from "@/lib/action-utils"
+import { requireSuperadmin } from "@/lib/authz"
 import { ProductCategory } from "@prisma/client"
 import * as z from "zod"
 
-// Helper to check authorization
-async function checkInventoryAuth() {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user || !("role" in session.user)) {
-        throw new Error("Unauthorized: No session found")
-    }
-
-    const role = session.user.role as string
-    if (role !== "SUPERADMIN") {
-        throw new Error("Unauthorized Access Detected: SUPERADMIN required")
-    }
-}
+const sizeChartRowSchema = z.object({
+    label: z.string().min(1),
+    ageRange: z.string().optional(),
+    chest: z.string().optional(),
+    waist: z.string().optional(),
+    length: z.string().optional(),
+})
 
 const createProductSchema = z.object({
     title: z.string().min(3),
@@ -28,7 +23,7 @@ const createProductSchema = z.object({
     basePrice: z.coerce.number().min(0),
     isNonReturnable: z.boolean().default(false),
     images: z.array(z.string()).default([]),
-    sizeChart: z.any().optional(),
+    sizeChart: z.array(sizeChartRowSchema).optional(),
     babyAgeRange: z.string().optional()
 })
 
@@ -36,7 +31,7 @@ type CreateProductData = z.infer<typeof createProductSchema>
 
 export async function createProduct(data: CreateProductData) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
         const parsed = createProductSchema.parse(data)
 
         const newProduct = await db.product.create({
@@ -53,17 +48,14 @@ export async function createProduct(data: CreateProductData) {
             }
         })
 
-        const { revalidatePath } = await import("next/cache")
         revalidatePath("/")
         revalidatePath("/shop")
+        revalidatePath("/admin/inventory")
 
-        return { success: true, data: newProduct }
-    } catch (error: any) {
-        if (error instanceof z.ZodError) {
-            return { success: false, error: "Validation failed: " + error.issues[0].message }
-        }
+        return actionSuccess(newProduct)
+    } catch (error) {
         console.error("[INVENTORY_ERROR] Failed to create product:", error)
-        return { success: false, error: error.message || "Failed to create product" }
+        return actionError(error, "Failed to create product")
     }
 }
 
@@ -80,30 +72,27 @@ type CreateProductVariantData = z.infer<typeof createVariantSchema>
 
 export async function createProductVariant(data: CreateProductVariantData) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
         const parsed = createVariantSchema.parse(data)
 
         const newVariant = await db.productVariant.create({
             data: parsed
         })
 
-        const { revalidatePath } = await import("next/cache")
         revalidatePath("/")
         revalidatePath("/shop")
+        revalidatePath("/admin/inventory")
 
-        return { success: true, data: newVariant }
-    } catch (error: any) {
-        if (error instanceof z.ZodError) {
-            return { success: false, error: "Validation failed: " + error.issues[0].message }
-        }
+        return actionSuccess(newVariant)
+    } catch (error) {
         console.error("[INVENTORY_ERROR] Failed to create variant:", error)
-        return { success: false, error: error.message || "Failed to create variant" }
+        return actionError(error, "Failed to create variant")
     }
 }
 
 export async function updateProduct(id: string, data: Partial<CreateProductData>) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
         const updateProductSchema = createProductSchema.partial()
         const parsed = updateProductSchema.parse(data)
 
@@ -113,56 +102,57 @@ export async function updateProduct(id: string, data: Partial<CreateProductData>
                 sizeChart: parsed.sizeChart ?? undefined, // handle nullable
             }
         })
-        const { revalidatePath } = await import("next/cache")
         revalidatePath("/admin/inventory")
+        revalidatePath(`/admin/inventory/${id}`)
         revalidatePath("/shop")
-        return { success: true, data: updated }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Update product failed" }
+        revalidatePath("/")
+        return actionSuccess(updated)
+    } catch (error) {
+        console.error("[INVENTORY_ERROR] Failed to update product:", error)
+        return actionError(error, "Update product failed")
     }
 }
 
 export async function updateProductVariant(id: string, data: Partial<CreateProductVariantData>) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
         const updateVariantSchema = createVariantSchema.omit({ productId: true }).partial()
         const parsed = updateVariantSchema.parse(data)
 
         const updated = await db.productVariant.update({
             where: { id }, data: parsed
         })
-        const { revalidatePath } = await import("next/cache")
         revalidatePath("/admin/inventory")
         revalidatePath("/shop")
-        return { success: true, data: updated }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Update variant failed" }
+        revalidatePath("/")
+        return actionSuccess(updated)
+    } catch (error) {
+        console.error("[INVENTORY_ERROR] Failed to update variant:", error)
+        return actionError(error, "Update variant failed")
     }
 }
 
-type OrderItemInput = {
-    variantId: string
-    quantity: number
-}
+const orderItemSchema = z.object({
+    variantId: z.string().min(1),
+    quantity: z.coerce.number().int().min(1),
+})
+
+type OrderItemInput = z.infer<typeof orderItemSchema>
 
 export async function deductInventory(orderItems: OrderItemInput[]) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
+        const parsedItems = z.array(orderItemSchema).min(1, "No items provided for deduction").parse(orderItems)
 
-        if (!orderItems || orderItems.length === 0) {
-            throw new Error("No items provided for deduction")
-        }
-
-        // Execute in a Prisma transaction to ensure stock consistency
+        const variantIds = parsedItems.map((item) => item.variantId)
         const result = await db.$transaction(async (tx) => {
-            const updatedVariants = []
+            const variants = await tx.productVariant.findMany({
+                where: { id: { in: variantIds } },
+            })
 
-            for (const item of orderItems) {
-                // Find variant and lock row if using a capable db (Raw queries needed for true pessimistic lock)
-                // For simplicity, we check and update in sequence
-                const variant = await tx.productVariant.findUnique({
-                    where: { id: item.variantId }
-                })
+            const variantMap = new Map(variants.map((variant) => [variant.id, variant]))
+            const updates = parsedItems.map(async (item) => {
+                const variant = variantMap.get(item.variantId)
 
                 if (!variant) {
                     throw new Error(`Variant not found: ${item.variantId}`)
@@ -172,7 +162,7 @@ export async function deductInventory(orderItems: OrderItemInput[]) {
                     throw new Error(`Insufficient stock for SKU: ${variant.sku}`)
                 }
 
-                const updated = await tx.productVariant.update({
+                return tx.productVariant.update({
                     where: { id: item.variantId },
                     data: {
                         stockCount: {
@@ -180,27 +170,24 @@ export async function deductInventory(orderItems: OrderItemInput[]) {
                         }
                     }
                 })
+            })
 
-                updatedVariants.push(updated)
-            }
-
-            return updatedVariants
+            return Promise.all(updates)
         })
 
-        const { revalidatePath } = await import("next/cache")
-        revalidatePath("/")
+        revalidatePath("/admin/inventory")
         revalidatePath("/shop")
-
-        return { success: true, data: result }
-    } catch (error: any) {
+        revalidatePath("/")
+        return actionSuccess(result)
+    } catch (error) {
         console.error("[INVENTORY_ERROR] Failed to deduct inventory:", error)
-        return { success: false, error: error.message || "Failed to deduct inventory" }
+        return actionError(error, "Failed to deduct inventory")
     }
 }
 
 export async function checkLowStock(variantId: string) {
     try {
-        await checkInventoryAuth()
+        await requireSuperadmin()
 
         const variant = await db.productVariant.findUnique({
             where: { id: variantId },
@@ -213,35 +200,30 @@ export async function checkLowStock(variantId: string) {
 
         const isLow = variant.stockCount <= variant.lowStockThreshold
 
-        return { success: true, data: isLow }
-    } catch (error: any) {
+        return actionSuccess(isLow)
+    } catch (error) {
         console.error("[INVENTORY_ERROR] Failed to check stock:", error)
-        return { success: false, error: error.message || "Failed to check stock" }
+        return actionError(error, "Failed to check stock")
     }
 }
 
 export async function updateStock(variantId: string, newCount: number) {
     try {
-        await checkInventoryAuth()
-
-        if (newCount < 0) {
-            throw new Error("Stock count cannot be negative")
-        }
+        await requireSuperadmin()
+        const parsedCount = z.coerce.number().min(0, "Stock count cannot be negative").parse(newCount)
 
         const updatedVariant = await db.productVariant.update({
             where: { id: variantId },
-            data: { stockCount: newCount }
+            data: { stockCount: parsedCount }
         })
 
-        // Revalidate the inventory path so UI updates instantly
-        const { revalidatePath } = await import("next/cache")
         revalidatePath("/admin/inventory")
         revalidatePath("/")
         revalidatePath("/shop")
 
-        return { success: true, data: updatedVariant }
-    } catch (error: any) {
+        return actionSuccess(updatedVariant)
+    } catch (error) {
         console.error("[INVENTORY_ERROR] Failed to update stock:", error)
-        return { success: false, error: error.message || "Failed to update stock" }
+        return actionError(error, "Failed to update stock")
     }
 }

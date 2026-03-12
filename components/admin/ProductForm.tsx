@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Plus, Trash2, Loader2, Image as ImageIcon, X, Ruler } from "lucide-react"
 import { createProduct, createProductVariant, updateProduct, updateProductVariant } from "@/app/actions/inventory"
-import { ProductCategory } from "@prisma/client"
 import toast from "react-hot-toast"
 import { CldUploadWidget } from "next-cloudinary"
 import { useRouter } from "next/navigation"
+import { PRODUCT_CATEGORIES, ProductCategoryValue } from "@/lib/domain"
 
 const AGE_RANGES = ["0-3 months", "3-6 months", "6-12 months", "12-18 months", "18-24 months", "2-3 years", "3-4 years", "4-5 years", "All ages"]
 
@@ -32,7 +32,7 @@ const sizeRowSchema = z.object({
 const productSchema = z.object({
     title: z.string().min(3),
     description: z.string().optional(),
-    category: z.nativeEnum(ProductCategory),
+    category: z.enum(PRODUCT_CATEGORIES),
     cogs: z.coerce.number().min(0),
     basePrice: z.coerce.number().min(0),
     babyAgeRange: z.string().optional(),
@@ -68,7 +68,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         defaultValues: initialData || {
             title: "",
             description: "",
-            category: ProductCategory.NEWBORN,
+            category: "NEWBORN" as ProductCategoryValue,
             cogs: 0,
             basePrice: 0,
             babyAgeRange: "",
@@ -186,7 +186,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                     <div>
                         <label className={labelCls}>Category *</label>
                         <select {...form.register("category")} className={inputCls}>
-                            {Object.values(ProductCategory).map(c => (
+                            {PRODUCT_CATEGORIES.map(c => (
                                 <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>
                             ))}
                         </select>

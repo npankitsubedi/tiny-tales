@@ -5,6 +5,7 @@ import Link from "next/link"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import EditCustomerModal from "@/components/admin/customers/EditCustomerModal"
+import { formatRsCompact } from "@/lib/currency"
 
 const STATUS_COLORS: Record<string, string> = {
     PENDING: "bg-slate-100 text-slate-700",
@@ -13,10 +14,6 @@ const STATUS_COLORS: Record<string, string> = {
     DELIVERED: "bg-green-100 text-green-700",
     CANCELED: "bg-red-100 text-red-700",
     RETURNED: "bg-slate-100 text-slate-600",
-}
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN')}`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -112,7 +109,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Lifetime Value (LTV)</p>
-                                <p className="text-2xl font-bold text-slate-800">{formatCurrency(lifetimeValue)}</p>
+                                <p className="text-2xl font-bold text-slate-800">{formatRsCompact(lifetimeValue)}</p>
                             </div>
                             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
                                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Completed Orders</p>
@@ -173,7 +170,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
                                                         <span className="font-bold text-slate-800">
-                                                            {formatCurrency(order.totalAmount.toNumber())}
+                                                            {formatRsCompact(order.totalAmount.toNumber())}
                                                         </span>
                                                         {order.invoice && (
                                                             <div className="mt-2 flex justify-end">

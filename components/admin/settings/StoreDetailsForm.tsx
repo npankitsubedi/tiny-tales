@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Save, Building2 } from 'lucide-react';
 import { updateStoreDetails, StoreDetailsInput } from '@/app/actions/settings';
+import { useRouter } from 'next/navigation';
 
 const detailsSchema = z.object({
     storeName: z.string().min(2, "Store name is required"),
@@ -16,7 +17,15 @@ const detailsSchema = z.object({
 
 type FormInput = z.infer<typeof detailsSchema>;
 
-export default function StoreDetailsForm({ initialData }: { initialData: any }) {
+type StoreDetailsFormData = {
+    storeName: string;
+    physicalAddress: string;
+    supportEmail: string;
+    supportPhone: string;
+}
+
+export default function StoreDetailsForm({ initialData }: { initialData: StoreDetailsFormData }) {
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -47,6 +56,7 @@ export default function StoreDetailsForm({ initialData }: { initialData: any }) 
             setStatus({ type: 'error', message: result.error || 'Failed to update store details' });
         } else {
             setStatus({ type: 'success', message: 'Store details updated successfully' });
+            router.refresh();
             setTimeout(() => setStatus(null), 3000);
         }
         setIsSubmitting(false);

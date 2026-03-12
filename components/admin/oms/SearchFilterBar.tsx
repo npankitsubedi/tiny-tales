@@ -3,7 +3,6 @@
 import { useCallback, useTransition } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Search, SlidersHorizontal, X } from "lucide-react"
-import { OrderStatus } from "@prisma/client"
 
 const STATUSES: { value: string; label: string }[] = [
     { value: "", label: "All Statuses" },

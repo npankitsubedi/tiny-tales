@@ -1,27 +1,12 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
 import { OrderStatus, InvoiceStatus, Prisma } from "@prisma/client"
 import { revalidatePath } from "next/cache"
 import { sendOrderStatusEmail } from "@/lib/email"
+import { actionError, actionSuccess } from "@/lib/action-utils"
+import { requireSuperadmin } from "@/lib/authz"
 import * as z from "zod"
-
-// --- Auth Helpers ---
-async function checkRole(allowedRoles: string[]) {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user || !("role" in session.user)) {
-        throw new Error("Unauthorized: No session found")
-    }
-
-    const role = session.user.role as string
-    if (!allowedRoles.includes(role)) {
-        throw new Error("Forbidden: Insufficient privileges")
-    }
-    return session.user
-}
 
 const orderItemSchema = z.object({
     variantId: z.string().min(1),
@@ -164,13 +149,12 @@ export async function createOrder(data: CreateOrderInput) {
         // Revalidate admin dashboards
         revalidatePath("/admin/sales")
         revalidatePath("/admin/inventory")
+        revalidatePath("/admin/dashboard")
 
-        return { success: true, data: result }
-    } catch (error: any) {
-        if (error instanceof z.ZodError) {
-            return { success: false, error: "Validation failed: " + error.issues[0].message }
-        }
-        return { success: false, error: error.message || "Checkout transaction failed" }
+        return actionSuccess(result)
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to create order:", error)
+        return actionError(error, "Checkout transaction failed")
     }
 }
 
@@ -178,7 +162,7 @@ export async function createOrder(data: CreateOrderInput) {
 // --- 2. Accounts Admin Analytics ---
 export async function getSalesAnalytics() {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
 
         const now = new Date()
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -225,15 +209,16 @@ export async function getSalesAnalytics() {
             }
         }
 
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to fetch analytics" }
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to fetch analytics:", error)
+        return actionError(error, "Failed to fetch analytics")
     }
 }
 
 // --- 3. Order Status Modification logic ---
 export async function updateOrderStatus(orderId: string, newStatus: OrderStatus) {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
 
         const order = await db.order.findUnique({
             where: { id: orderId },
@@ -272,22 +257,23 @@ export async function updateOrderStatus(orderId: string, newStatus: OrderStatus)
                     customerEmail,
                     newStatus
                 ).catch(console.error)
-            } else {
-                console.log(`[EMAIL_SYSTEM] Order ${orderId} has no associated email (Guest). Skipping notification.`)
             }
         }
 
         revalidatePath("/admin/sales")
-        return { success: true, data: updatedOrder }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to edit order status" }
+        revalidatePath(`/admin/sales/orders/${orderId}`)
+        revalidatePath("/admin/dashboard")
+        return actionSuccess(updatedOrder)
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to update order status:", error)
+        return actionError(error, "Failed to edit order status")
     }
 }
 
 // --- 4. Payment Capture Logic ---
 export async function capturePayment(orderId: string, paymentMethod: string) {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
 
         const order = await db.order.findUnique({
             where: { id: orderId },
@@ -317,9 +303,12 @@ export async function capturePayment(orderId: string, paymentMethod: string) {
 
         revalidatePath("/admin/sales")
         revalidatePath("/admin/accounts")
-        return { success: true }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to capture payment" }
+        revalidatePath("/admin/accounts/sales")
+        revalidatePath(`/admin/sales/orders/${orderId}`)
+        return actionSuccess(undefined, "Payment captured successfully")
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to capture payment:", error)
+        return actionError(error, "Failed to capture payment")
     }
 }
 
@@ -327,35 +316,52 @@ export async function capturePayment(orderId: string, paymentMethod: string) {
 // --- 5. Internal Order Notes ---
 export async function saveOrderNote(orderId: string, notes: string) {
     try {
-        await checkRole(["SUPERADMIN"])
+        await requireSuperadmin()
         await db.order.update({
             where: { id: orderId },
             data: { adminNotes: notes.trim() || null }
         })
         revalidatePath(`/admin/sales/orders/${orderId}`)
-        return { success: true }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to save note" }
+        revalidatePath("/admin/sales")
+        return actionSuccess(undefined, "Order note saved")
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to save order note:", error)
+        return actionError(error, "Failed to save note")
     }
 }
 
 // --- 6. User Cart Retention ---
-export async function saveCart(userId: string | null, cartData: any) {
+const cartItemSchema = z.object({
+    variantId: z.string().min(1),
+    productId: z.string().min(1),
+    title: z.string().min(1),
+    price: z.coerce.number().min(0),
+    quantity: z.coerce.number().int().min(1),
+    size: z.string().min(1),
+    color: z.string().min(1),
+    image: z.string().optional(),
+})
+
+const cartSchema = z.array(cartItemSchema)
+
+export async function saveCart(userId: string | null, cartData: unknown) {
     try {
         if (!userId) {
             // Unauthenticated cart session logic could rely on localstorage + server mapping.
-            return { success: true, placeholder: true }
+            return actionSuccess({ placeholder: true })
         }
 
+        const parsedCart = cartSchema.parse(cartData)
         const cart = await db.abandonedCart.create({
             data: {
                 userId: userId,
-                cartData: cartData
+                cartData: parsedCart
             }
         })
 
-        return { success: true, data: cart }
-    } catch (error: any) {
-        return { success: false, error: error.message || "Failed to save cart" }
+        return actionSuccess(cart)
+    } catch (error) {
+        console.error("[SALES_ERROR] Failed to save cart:", error)
+        return actionError(error, "Failed to save cart")
     }
 }

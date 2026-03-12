@@ -10,6 +10,7 @@ import { generateEsewaPayload, initiateKhaltiPayment } from "@/app/actions/payme
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
 import { ShoppingBag, MessageCircle, CreditCard, Truck, Loader2 } from "lucide-react"
+import { formatRs } from "@/lib/currency"
 
 const DELIVERY_CITIES = ["Kathmandu", "Lalitpur", "Bhaktapur", "Outside Valley"]
 
@@ -70,8 +71,8 @@ export default function CheckoutPage() {
         try {
             // ── INTERNATIONAL → WhatsApp ──
             if (!isNepal) {
-                const itemList = items.map(i => `• ${i.quantity}x ${i.title} (${i.size}, ${i.color}) — Rs.${(i.price * i.quantity).toFixed(2)}`).join("\n")
-                const message = `Hi Tiny Tales! 👋\n\nI'd like to place an international order:\n\n${itemList}\n\n📦 *Total: Rs. ${total.toFixed(2)}* (incl. 13% VAT)\n\n📍 Ship to:\n${data.customerName}\n${data.address}, ${data.deliveryCity || data.country}, ${data.country}\n📞 ${data.contactPhone}\n\nPlease help me finalize shipping!`
+                const itemList = items.map(i => `• ${i.quantity}x ${i.title} (${i.size}, ${i.color}) — ${formatRs(i.price * i.quantity)}`).join("\n")
+                const message = `Hi Tiny Tales! 👋\n\nI'd like to place an international order:\n\n${itemList}\n\n📦 *Total: ${formatRs(total)}* (incl. 13% VAT)\n\n📍 Ship to:\n${data.customerName}\n${data.address}, ${data.deliveryCity || data.country}, ${data.country}\n📞 ${data.contactPhone}\n\nPlease help me finalize shipping!`
                 window.open(`https://wa.me/9779800000000?text=${encodeURIComponent(message)}`, "_blank")
                 setIsProcessing(false)
                 return
@@ -157,7 +158,7 @@ export default function CheckoutPage() {
                 <ShoppingBag className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                 <h2 className="font-serif text-2xl text-slate-700 mb-2">Your cart is empty</h2>
                 <p className="text-slate-500 mb-6">Add some products before checking out.</p>
-                <a href="/shop" className="bg-primary text-primary-foreground px-6 py-3 rounded-full font-semibold hover:opacity-90 transition-opacity">Browse Shop</a>
+                <a href="/shop" className="bg-orange-600 px-6 py-3 rounded-full font-semibold text-white transition-colors hover:bg-orange-700">Browse Shop</a>
             </div>
         </div>
     )
@@ -275,24 +276,24 @@ export default function CheckoutPage() {
                                             <p className="font-medium text-slate-800 line-clamp-1">{item.title}</p>
                                             <p className="text-xs text-slate-400">{item.size} · {item.color} · x{item.quantity}</p>
                                         </div>
-                                        <span className="font-medium text-slate-800 shrink-0 ml-2">Rs. {(item.price * item.quantity).toFixed(2)}</span>
+                                        <span className="font-medium text-slate-800 shrink-0 ml-2">{formatRs(item.price * item.quantity)}</span>
                                     </div>
                                 ))}
                             </div>
                             <div className="border-t border-slate-100 pt-4 space-y-2 text-sm">
-                                <div className="flex justify-between text-slate-500"><span>Subtotal</span><span>Rs. {cartTotal.toFixed(2)}</span></div>
-                                <div className="flex justify-between text-slate-500"><span>VAT (13%)</span><span>Rs. {vat.toFixed(2)}</span></div>
+                                <div className="flex justify-between text-slate-500"><span>Subtotal</span><span>{formatRs(cartTotal)}</span></div>
+                                <div className="flex justify-between text-slate-500"><span>VAT (13%)</span><span>{formatRs(vat)}</span></div>
                                 <div className="flex justify-between font-bold text-slate-800 text-base pt-2 border-t border-slate-100">
-                                    <span>Total</span><span>Rs. {total.toFixed(2)}</span>
+                                    <span>Total</span><span>{formatRs(total)}</span>
                                 </div>
                             </div>
 
                             <button type="submit" disabled={isProcessing}
-                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-primary-foreground flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${isNepal ? "bg-primary hover:opacity-90" : "bg-[#25D366] hover:bg-[#20bd5a]"}`}>
+                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${isNepal ? "bg-orange-600 hover:bg-orange-700" : "bg-[#25D366] hover:bg-[#20bd5a]"}`}>
                                 {isProcessing ? (
                                     <><Loader2 className="w-4 h-4 animate-spin" /> {processingStep || "Processing…"}</>
                                 ) : isNepal ? (
-                                    `Place Order — Rs. ${total.toFixed(2)}`
+                                    `Place Order — ${formatRs(total)}`
                                 ) : (
                                     <><MessageCircle className="w-5 h-5" /> Contact on WhatsApp</>
                                 )}

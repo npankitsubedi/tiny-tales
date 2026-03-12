@@ -74,7 +74,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         adminNotes: orderRaw.adminNotes,
         totalAmount: orderRaw.totalAmount.toNumber(),
         taxAmount: orderRaw.taxAmount.toNumber(),
-        createdAt: orderRaw.createdAt,
+        createdAt: orderRaw.createdAt.toISOString(),
         email: orderRaw.user?.email ?? null,
         lifetimeOrders,
         lifetimeValue,

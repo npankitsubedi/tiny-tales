@@ -2,28 +2,22 @@
 
 /* ─── Tailwind v4 Theme Tokens ─── */
 @theme inline {
-    /* ── Dusty Periwinkle Brand Palette ── */
-    --color-brand-primary: #C8D9E6;
-    /* Dusty Periwinkle – buttons, active states */
-    --color-brand-primary-dk: #A8BDD0;
-    /* Darker periwinkle for hover states */
-    --color-brand-soft: #EEF4F9;
-    /* Lightest periwinkle tint – chip backgrounds */
+    /* ── Premium Orange Brand Palette ── */
+    --color-brand-primary: #ea580c;
+    --color-brand-primary-dk: #c2410c;
+    --color-brand-soft: #fff7ed;
     --color-brand-bg: #FFFFFF;
-    /* Pure White – page background */
-    --color-brand-surface: #F5F5F5;
-    /* Soft Ghost – cards, form inputs, sidebar */
-    --color-brand-border: #D1D1D1;
-    /* Silver Lining – borders, dividers */
+    --color-brand-surface: #f9fafb;
+    --color-brand-border: #e5e7eb;
 
     /* ── Legacy aliases kept for gradual migration ── */
     --color-brand-cream: #FFFFFF;
     --color-brand-warm: #F5F5F5;
-    --color-brand-amber: #C8D9E6;
-    --color-brand-rose: #A8BDD0;
-    --color-brand-blush: #EEF4F9;
-    --color-brand-teal: #C8D9E6;
-    --color-brand-mint: #EEF4F9;
+    --color-brand-amber: #fdba74;
+    --color-brand-rose: #fb923c;
+    --color-brand-blush: #fff7ed;
+    --color-brand-teal: #fed7aa;
+    --color-brand-mint: #ffedd5;
 
     /* Text */
     --color-text-primary: #1E293B;
@@ -51,13 +45,13 @@
 :root {
     --background: #FFFFFF;
     --foreground: #1E293B;
-    --primary: #1E293B;
+    --primary: #ea580c;
     --primary-foreground: #FFFFFF;
-    --secondary: #C8D9E6;
-    --secondary-foreground: #1E293B;
-    --muted: #F5F5F5;
-    --border: #D1D1D1;
-    --ring: #A8BDD0;
+    --secondary: #fff7ed;
+    --secondary-foreground: #9a3412;
+    --muted: #f9fafb;
+    --border: #e5e7eb;
+    --ring: #fdba74;
 }
 
 *,
@@ -93,7 +87,7 @@ h4,
 
 /* ─── Focus Styles (a11y) ─── */
 :focus-visible {
-    outline: 2px solid #C8D9E6;
+    outline: 2px solid #fdba74;
     outline-offset: 3px;
     border-radius: 6px;
 }
@@ -109,12 +103,12 @@ h4,
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #D1D1D1;
+    background: #d1d5db;
     border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #A8BDD0;
+    background: #fb923c;
 }
 
 /* ─── Minimum touch target for a11y ─── */
@@ -133,14 +127,14 @@ a,
 
 /* ─── Brand Button Utility ─── */
 .btn-primary {
-    background-color: #C8D9E6;
-    color: #1E293B;
+    background-color: #ea580c;
+    color: #FFFFFF;
     font-weight: 600;
     transition: background-color 0.15s, box-shadow 0.15s;
 }
 
 .btn-primary:hover {
-    background-color: #A8BDD0;
+    background-color: #c2410c;
 }
 
 /* ─── Skeleton Shimmer Animation ─── */

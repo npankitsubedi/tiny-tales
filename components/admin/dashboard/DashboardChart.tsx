@@ -9,6 +9,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from 'recharts';
+import { formatRsCompact } from '@/lib/currency';
 
 interface CashFlowChartProps {
     data: {
@@ -18,9 +19,13 @@ interface CashFlowChartProps {
     }[];
 }
 
-const formatCurrency = (value: number) => {
-    return `Rs. ${value.toLocaleString('en-IN')}`;
-};
+function formatAxisValue(value: number) {
+    if (value >= 1000) {
+        return `Rs. ${(value / 1000).toFixed(0)}k`
+    }
+
+    return formatRsCompact(value)
+}
 
 export default function DashboardChart({ data }: CashFlowChartProps) {
     if (!data || data.length === 0) {
@@ -62,7 +67,7 @@ export default function DashboardChart({ data }: CashFlowChartProps) {
                         tickLine={false}
                     />
                     <YAxis
-                        tickFormatter={(value) => `Rs. ${(value / 1000).toFixed(0)}k`}
+                        tickFormatter={formatAxisValue}
                         stroke="#cbd5e1"
                         tick={{ fill: '#94a3b8', fontSize: 12 }}
                         dx={-10}
@@ -71,7 +76,7 @@ export default function DashboardChart({ data }: CashFlowChartProps) {
                     />
                     <Tooltip
                         contentStyle={{ borderRadius: '12px', border: '1px solid #f1f5f9', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)' }}
-                        formatter={(value: any, name: any) => [formatCurrency(Number(value)), String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
+                        formatter={(value: number, name: string) => [formatRsCompact(Number(value)), String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
                         labelFormatter={(label) => new Date(label).toLocaleDateString('en-IN', { weekday: 'short', month: 'long', day: 'numeric' })}
                     />
                     <Area

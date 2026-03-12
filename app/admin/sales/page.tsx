@@ -10,7 +10,6 @@ import { Suspense } from "react"
 import SearchFilterBar from "@/components/admin/oms/SearchFilterBar"
 import OrdersDataGrid from "@/components/admin/oms/OrdersDataGrid"
 import SalesCommandCenterClient from "@/components/admin/SalesCommandCenterClient"
-import { formatRsCompact } from "@/lib/currency"
 
 export const metadata = {
     title: "Order Command Center | Tiny Tales Admin",
@@ -19,8 +18,8 @@ export const metadata = {
 
 async function verifySalesAccess() {
     const session = await getServerSession(authOptions)
-    if (!session || !session.user || !(("role" in session.user) && session.user.role)) redirect("/login")
-    if ((session.user as any).role !== "SUPERADMIN") redirect("/unauthorized")
+    if (!session?.user?.role) redirect("/login")
+    if (session.user.role !== "SUPERADMIN") redirect("/unauthorized")
 }
 
 // ── Inline Server Actions ──────────────────────────────────────────────────
@@ -45,7 +44,14 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
     const { q, status, payment } = await searchParams
 
     // Build Prisma WHERE clause from filters
-    const where: any = {}
+    const where: {
+        OR?: Array<Record<string, unknown>>
+        status?: OrderStatus
+        invoice?: {
+            invoiceNumber?: { contains: string; mode: "insensitive" }
+            status?: InvoiceStatus | { not: InvoiceStatus }
+        }
+    } = {}
 
     if (q) {
         where.OR = [
@@ -83,18 +89,36 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
         db.order.count({ where: { invoice: { status: "UNPAID" } } })
     ])
 
-    // ── Serialize ALL Decimals ─────────────────────────────────────────────
     const serializedOrders = ordersRaw.map(o => ({
-        ...o,
+        id: o.id,
+        customerName: o.customerName,
+        contactPhone: o.contactPhone,
+        shippingAddress: o.shippingAddress,
+        deliveryCity: o.deliveryCity,
+        isInternational: o.isInternational,
+        status: o.status,
+        paymentMethod: o.paymentMethod,
+        adminNotes: o.adminNotes,
         totalAmount: o.totalAmount.toNumber(),
         taxAmount: o.taxAmount.toNumber(),
+        createdAt: o.createdAt.toISOString(),
         orderItems: o.orderItems.map(item => ({
-            ...item,
+            id: item.id,
+            quantity: item.quantity,
             priceAtPurchase: item.priceAtPurchase.toNumber(),
             variant: {
-                ...item.variant,
+                id: item.variant.id,
+                size: item.variant.size,
+                color: item.variant.color,
+                sku: item.variant.sku,
+                stockCount: item.variant.stockCount,
+                lowStockThreshold: item.variant.lowStockThreshold,
                 product: {
-                    ...item.variant.product,
+                    id: item.variant.product.id,
+                    title: item.variant.product.title,
+                    category: item.variant.product.category,
+                    images: item.variant.product.images,
+                    isNonReturnable: item.variant.product.isNonReturnable,
                     cogs: item.variant.product.cogs.toNumber(),
                     basePrice: item.variant.product.basePrice.toNumber(),
                 }
@@ -116,7 +140,7 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
         status: o.status,
         totalAmount: o.totalAmount,
         paymentMethod: o.paymentMethod,
-        createdAt: o.createdAt,
+        createdAt: o.createdAt.toISOString(),
         invoice: o.invoice ? { id: o.invoice.id, status: o.invoice.status } : null
     }))
 
@@ -136,7 +160,7 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
                         </p>
                     </div>
                     <Link href="/admin/sales/customers">
-                        <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl transition-colors font-medium text-sm shadow-sm">
+                        <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl transition-colors font-medium text-sm shadow-sm">
                             <Users className="w-4 h-4" /> CRM / Customers
                         </button>
                     </Link>
@@ -197,7 +221,7 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
                     <OrdersDataGrid
                         orders={gridOrders}
                         onStatusChange={handleStatusUpdate}
-                        onCapturePayment={(id) => Promise.resolve(console.log(id) as any)}
+                        onCapturePayment={handleCapturePayment}
                     />
                 </div>
 

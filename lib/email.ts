@@ -81,7 +81,6 @@ export async function sendOrderStatusEmail(
             html: htmlContent,
         });
 
-        console.log(`[EMAIL_SYSTEM] Successfully sent ${newStatus} email to ${customerEmail}`);
         return { success: true, data };
     } catch (error) {
         console.error(`[EMAIL_SYSTEM_ERROR] Failed to send ${newStatus} email to ${customerEmail}:`, error);

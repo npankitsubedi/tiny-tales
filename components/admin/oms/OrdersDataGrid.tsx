@@ -1,23 +1,23 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { OrderStatus } from "@prisma/client"
 import { format } from "date-fns"
 import { formatRs } from "@/lib/currency"
 import { FulfillmentPill, PaymentPill } from "@/components/admin/oms/StatusPill"
-import { ChevronRight, Package, XCircle, Banknote } from "lucide-react"
+import { ChevronRight, Package, XCircle, Banknote, Check, Loader2, X } from "lucide-react"
 import toast from "react-hot-toast"
+import { OrderStatusValue } from "@/lib/domain"
 
 type GridOrder = {
     id: string
     invoiceNumber: string | null
     customerName: string | null
     contactPhone: string | null
-    status: OrderStatus
+    status: OrderStatusValue
     totalAmount: number
     paymentMethod: string
-    createdAt: Date
+    createdAt: string
     invoice: {
         id: string
         status: "PAID" | "UNPAID" | "OVERDUE" | "CANCELLED"
@@ -26,11 +26,11 @@ type GridOrder = {
 
 interface OrdersDataGridProps {
     orders: GridOrder[]
-    onStatusChange: (id: string, status: OrderStatus) => Promise<boolean>
-    onCapturePayment: (id: string) => void
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
+    onCapturePayment: (id: string, method: string) => Promise<{ success: boolean; error?: string }>
 }
 
-const STATUS_NEXT: Partial<Record<OrderStatus, { label: string; next: OrderStatus }>> = {
+const STATUS_NEXT: Partial<Record<OrderStatusValue, { label: string; next: OrderStatusValue }>> = {
     PENDING: { label: "Confirm", next: "CONFIRMED" },
     CONFIRMED: { label: "Mark Packed", next: "PACKED" },
     PACKED: { label: "Mark Shipped", next: "SHIPPED" },
@@ -41,6 +41,17 @@ const STATUS_NEXT: Partial<Record<OrderStatus, { label: string; next: OrderStatu
 export default function OrdersDataGrid({ orders, onStatusChange, onCapturePayment }: OrdersDataGridProps) {
     const [localOrders, setLocalOrders] = useState(orders)
     const [loadingId, setLoadingId] = useState<string | null>(null)
+    const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null)
+    const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
+    const [isCapturing, setIsCapturing] = useState(false)
+
+    const paymentOptions = [
+        { id: "Cash", label: "Cash" },
+        { id: "Fonepay", label: "Fonepay / QR" },
+        { id: "Mobile Banking", label: "Mobile Banking" },
+        { id: "Card", label: "Card (POS)" },
+        { id: "Cheque", label: "Cheque" },
+    ]
 
     const handleAdvance = async (e: React.MouseEvent, order: GridOrder) => {
         e.stopPropagation()
@@ -161,7 +172,11 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                                     <div className="flex items-center justify-end gap-2">
                                         {needsPayment && (
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); onCapturePayment(order.id) }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setPaymentOrderId(order.id)
+                                                    setSelectedMethod(null)
+                                                }}
                                                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors"
                                             >
                                                 <Banknote className="w-3.5 h-3.5" />
@@ -194,6 +209,107 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                     })}
                 </tbody>
             </table>
+
+            {paymentOrderId && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
+                    onClick={() => {
+                        if (!isCapturing) {
+                            setPaymentOrderId(null)
+                            setSelectedMethod(null)
+                        }
+                    }}
+                >
+                    <div
+                        className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
+                            <h3 className="text-lg font-bold text-slate-800">Capture Payment</h3>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (!isCapturing) {
+                                        setPaymentOrderId(null)
+                                        setSelectedMethod(null)
+                                    }
+                                }}
+                                className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-200"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4 p-6">
+                            <p className="text-sm text-slate-500">
+                                Choose the tender used by the customer to settle this delivered COD order.
+                            </p>
+
+                            <div className="space-y-2">
+                                {paymentOptions.map((option) => (
+                                    <label
+                                        key={option.id}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-colors ${
+                                            selectedMethod === option.id
+                                                ? "border-orange-600 bg-orange-50"
+                                                : "border-slate-200 hover:bg-slate-50"
+                                        }`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value={option.id}
+                                            checked={selectedMethod === option.id}
+                                            onChange={() => setSelectedMethod(option.id)}
+                                            className="h-4 w-4 accent-orange-600"
+                                        />
+                                        <span className="text-sm font-medium text-slate-700">{option.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                disabled={!selectedMethod || isCapturing}
+                                onClick={async () => {
+                                    if (!paymentOrderId || !selectedMethod) return
+
+                                    setIsCapturing(true)
+                                    const result = await onCapturePayment(paymentOrderId, selectedMethod)
+
+                                    if (!result.success) {
+                                        toast.error(result.error ?? "Failed to capture payment")
+                                        setIsCapturing(false)
+                                        return
+                                    }
+
+                                    setLocalOrders((currentOrders) =>
+                                        currentOrders.map((currentOrder) =>
+                                            currentOrder.id === paymentOrderId
+                                                ? {
+                                                    ...currentOrder,
+                                                    paymentMethod: selectedMethod,
+                                                    invoice: currentOrder.invoice
+                                                        ? { ...currentOrder.invoice, status: "PAID" }
+                                                        : null,
+                                                }
+                                                : currentOrder
+                                        )
+                                    )
+                                    toast.success("Payment captured successfully")
+                                    setPaymentOrderId(null)
+                                    setSelectedMethod(null)
+                                    setIsCapturing(false)
+                                }}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 py-3 font-semibold text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                                Confirm Capture
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -35,7 +35,7 @@ export default function ProductCard({ id, title, basePrice, category, totalStock
             <Link
                 href={`/products/${id}`}
                 className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded-[2rem]"
-                aria-label={`View ${title} — RS ${basePrice.toFixed(2)}`}
+                aria-label={`View ${title} — ${formatRsCompact(basePrice)}`}
             >
                 <article className="bg-white rounded-[2rem] overflow-hidden border border-slate-100/60 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-secondary/40 transition-all duration-300 ease-out h-full flex flex-col isolate">
 

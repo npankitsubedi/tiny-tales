@@ -1,6 +1,6 @@
-import { OrderStatus } from "@prisma/client"
+import { OrderStatusValue } from "@/lib/domain"
 
-type FulfillmentStatus = OrderStatus
+type FulfillmentStatus = OrderStatusValue
 type PaymentStatus = "PAID" | "UNPAID" | "OVERDUE" | "CANCELLED"
 
 const FULFILLMENT_CONFIG: Record<FulfillmentStatus, { label: string; className: string }> = {

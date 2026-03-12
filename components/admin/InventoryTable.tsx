@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Search, Edit, Image as ImageIcon } from "lucide-react"
 import Link from "next/link"
+import { formatRs } from "@/lib/currency"
 
 type Variant = {
     id: string
@@ -122,7 +123,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-800 font-medium">RS {product.basePrice.toFixed(2)}</span>
+                                            <span className="text-slate-800 font-medium">{formatRs(product.basePrice)}</span>
                                             <span className="text-xs text-[#2D5068] mt-0.5">{getProfitMargin(product.basePrice, product.cogs)}% margin</span>
                                         </div>
                                     </td>

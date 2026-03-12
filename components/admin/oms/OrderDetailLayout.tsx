@@ -1,9 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { OrderStatus } from "@prisma/client"
 import { formatRs } from "@/lib/currency"
 import StatusStepper from "@/components/admin/oms/StatusStepper"
 import LineItemsCard from "@/components/admin/oms/LineItemsCard"
@@ -12,6 +10,7 @@ import ShippingLabelCard from "@/components/admin/oms/ShippingLabelCard"
 import PaymentLedgerCard from "@/components/admin/oms/PaymentLedgerCard"
 import InternalNotesCard from "@/components/admin/oms/InternalNotesCard"
 import { ArrowLeft, Printer } from "lucide-react"
+import { OrderStatusValue } from "@/lib/domain"
 
 type LineItem = {
     id: string
@@ -33,12 +32,12 @@ type OrderDetailProps = {
     shippingAddress: string | null
     deliveryCity: string | null
     isInternational: boolean
-    status: OrderStatus
+    status: OrderStatusValue
     paymentMethod: string
     adminNotes: string | null
     totalAmount: number
     taxAmount: number
-    createdAt: Date
+    createdAt: string
     orderItems: LineItem[]
     email: string | null
     lifetimeOrders: number
@@ -50,7 +49,7 @@ type OrderDetailProps = {
         amountDue: number
         amountPaid: number
     } | null
-    onStatusChange: (id: string, status: OrderStatus) => Promise<boolean>
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
     onCapturePayment: (orderId: string, method: string) => Promise<{ success: boolean; error?: string }>
     onSaveNote: (orderId: string, notes: string) => Promise<{ success: boolean; error?: string }>
 }

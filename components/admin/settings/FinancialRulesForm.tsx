@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Save, Calculator } from 'lucide-react';
 import { updateFinancialRules, FinancialRulesInput } from '@/app/actions/settings';
+import { useRouter } from 'next/navigation';
 
 const rulesSchema = z.object({
     defaultTaxRate: z.coerce.number().min(0).max(100),
@@ -15,7 +16,14 @@ const rulesSchema = z.object({
 
 type FormInput = z.infer<typeof rulesSchema>;
 
-export default function FinancialRulesForm({ initialData }: { initialData: any }) {
+type FinancialRulesFormData = {
+    defaultTaxRate: number;
+    flatShippingFee: number;
+    freeShippingThreshold: number;
+}
+
+export default function FinancialRulesForm({ initialData }: { initialData: FinancialRulesFormData }) {
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
@@ -38,6 +46,7 @@ export default function FinancialRulesForm({ initialData }: { initialData: any }
             setStatus({ type: 'error', message: result.error || 'Failed to update financial rules' });
         } else {
             setStatus({ type: 'success', message: 'Financial rules synchronized successfully' });
+            router.refresh();
             setTimeout(() => setStatus(null), 3000);
         }
         setIsSubmitting(false);

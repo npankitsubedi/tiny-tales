@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { format } from "date-fns"
 import { User, Package, FileText, LogOut } from "lucide-react"
 import Link from "next/link"
+import { formatRs } from "@/lib/currency"
 
 const STATUS_COLORS: Record<string, string> = {
     PENDING: "bg-[#D9E9F2] text-[#2D5068]",
@@ -80,7 +81,7 @@ export default async function AccountPage() {
                             <p className="font-medium text-slate-500">No orders yet</p>
                             <p className="text-sm mt-1">Your future orders will appear here.</p>
                             <Link href="/shop">
-                                <button className="mt-5 bg-[#C8D9E6] hover:bg-[#A8BDD0] text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-all">
+                                <button className="mt-5 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-colors">
                                     Start Shopping
                                 </button>
                             </Link>
@@ -112,7 +113,7 @@ export default async function AccountPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-slate-800">
-                                                Rs. {order.totalAmount.toFixed(2)}
+                                                {formatRs(order.totalAmount)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 {order.invoice ? (

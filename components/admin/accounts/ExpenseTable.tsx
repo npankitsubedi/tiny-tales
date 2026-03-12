@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { recordExpense } from '@/app/actions/accounting';
 import { useRouter } from 'next/navigation';
+import { formatRs } from '@/lib/currency';
+import toast from 'react-hot-toast';
 
 interface ExpenseRow {
     id: string;
@@ -33,10 +35,6 @@ const expenseSchema = z.object({
 });
 
 type ExpenseFormValues = z.infer<typeof expenseSchema>;
-
-function formatCurrency(amount: number) {
-    return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export default function ExpenseTable({ data, vendors }: ExpenseTableProps) {
     const router = useRouter();
@@ -71,9 +69,13 @@ export default function ExpenseTable({ data, vendors }: ExpenseTableProps) {
                 setIsSlideOutOpen(false);
                 reset();
                 router.refresh();
+                toast.success('Expense recorded successfully');
+            } else {
+                toast.error(res.error);
             }
         } catch (error) {
             console.error(error);
+            toast.error('Failed to record expense');
         } finally {
             setIsSubmitting(false);
         }
@@ -127,7 +129,7 @@ export default function ExpenseTable({ data, vendors }: ExpenseTableProps) {
                                         {row.paymentMethod.toLowerCase()}
                                     </td>
                                     <td className="px-6 py-3 text-sm font-bold text-slate-900 text-right">
-                                        {formatCurrency(row.amount)}
+                                        {formatRs(row.amount)}
                                     </td>
                                 </tr>
                             ))

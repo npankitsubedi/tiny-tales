@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { OrderStatus } from "@prisma/client"
 import { CheckCircle2, Circle, Loader2 } from "lucide-react"
 import toast from "react-hot-toast"
+import { OrderStatusValue } from "@/lib/domain"
 
-const STEPS: { status: OrderStatus; label: string; short: string }[] = [
+const STEPS: { status: OrderStatusValue; label: string; short: string }[] = [
     { status: "PENDING", label: "Order Received", short: "Pending" },
     { status: "CONFIRMED", label: "Confirmed", short: "Confirmed" },
     { status: "PACKED", label: "Packed", short: "Packed" },
@@ -16,7 +16,7 @@ const STEPS: { status: OrderStatus; label: string; short: string }[] = [
 
 const STATUS_ORDER = STEPS.map(s => s.status)
 
-const ADVANCE_MAP: Partial<Record<OrderStatus, { next: OrderStatus; label: string }>> = {
+const ADVANCE_MAP: Partial<Record<OrderStatusValue, { next: OrderStatusValue; label: string }>> = {
     PENDING: { next: "CONFIRMED", label: "Confirm Order" },
     CONFIRMED: { next: "PACKED", label: "Mark as Packed" },
     PACKED: { next: "SHIPPED", label: "Mark as Shipped" },
@@ -26,8 +26,8 @@ const ADVANCE_MAP: Partial<Record<OrderStatus, { next: OrderStatus; label: strin
 
 interface StatusStepperProps {
     orderId: string
-    initialStatus: OrderStatus
-    onStatusChange: (id: string, status: OrderStatus) => Promise<boolean>
+    initialStatus: OrderStatusValue
+    onStatusChange: (id: string, status: OrderStatusValue) => Promise<boolean>
     onCancel: (id: string) => Promise<boolean>
 }
 
