@@ -40,11 +40,11 @@ export default async function SettingsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6 md:p-10">
+        <div className="min-h-screen p-6 md:p-10">
             <div className="max-w-4xl mx-auto space-y-8">
                 
                 {/* Header */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <header className="admin-glass sticky top-0 z-30 flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-[1.75rem] border border-white/70 px-6 py-5 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.28)]">
                     <div>
                         <div className="flex items-center gap-3">
                             <h1 className="text-3xl font-serif text-slate-800 tracking-tight flex items-center gap-3">
@@ -52,7 +52,8 @@ export default async function SettingsPage() {
                                 Operational Settings
                             </h1>
                         </div>
-                        <p className="text-slate-500 mt-2 text-sm pl-10">
+                        <p className="admin-label mt-4 pl-10">Control Layer</p>
+                        <p className="text-slate-500 mt-1 text-sm pl-10">
                             Global store configuration running the underlying tax and shipping algorithms.
                         </p>
                     </div>
@@ -64,7 +65,7 @@ export default async function SettingsPage() {
                 </div>
 
                 {/* Read-Only Admin Block */}
-                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="admin-surface rounded-[1.75rem] overflow-hidden">
                     <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-indigo-500">

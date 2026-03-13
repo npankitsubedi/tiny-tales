@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { Save, Building2 } from 'lucide-react';
 import { updateStoreDetails, StoreDetailsInput } from '@/app/actions/settings';
 import { useRouter } from 'next/navigation';
+import FormStatusButton from '@/components/ui/FormStatusButton';
 
 const detailsSchema = z.object({
     storeName: z.string().min(2, "Store name is required"),
@@ -62,8 +63,12 @@ export default function StoreDetailsForm({ initialData }: { initialData: StoreDe
         setIsSubmitting(false);
     };
 
+    const submitStoreDetailsForm = async () => {
+        await handleSubmit(onSubmit)();
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <form action={submitStoreDetailsForm} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg shadow-sm border border-slate-100 text-orange-500">
                     <Building2 className="w-5 h-5" />
@@ -123,14 +128,14 @@ export default function StoreDetailsForm({ initialData }: { initialData: StoreDe
                 </div>
 
                 <div className="pt-4 flex justify-end">
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center gap-2"
+                    <FormStatusButton
+                        externalLoading={isSubmitting}
+                        loadingText="Saving Store Details..."
+                        className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center gap-2"
                     >
-                        {isSubmitting ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                        <Save className="w-4 h-4" />
                         Save Store Details
-                    </button>
+                    </FormStatusButton>
                 </div>
             </div>
         </form>

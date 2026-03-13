@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -9,8 +10,9 @@ import { createOrder } from "@/app/actions/sales"
 import { generateEsewaPayload, initiateKhaltiPayment } from "@/app/actions/payments"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
-import { ShoppingBag, MessageCircle, CreditCard, Truck, Loader2 } from "lucide-react"
+import { ShoppingBag, MessageCircle, CreditCard, Truck } from "lucide-react"
 import { formatRs } from "@/lib/currency"
+import FormStatusButton from "@/components/ui/FormStatusButton"
 
 const DELIVERY_CITIES = ["Kathmandu", "Lalitpur", "Bhaktapur", "Outside Valley"]
 
@@ -48,6 +50,9 @@ export default function CheckoutPage() {
     const isNepal = selectedCountry.trim().toLowerCase() === "nepal"
     const vat = cartTotal * 0.13
     const total = cartTotal + vat
+    const submitCheckout = async () => {
+        await handleSubmit(onSubmit)()
+    }
 
     // ── Shared order creation (creates DB record in PENDING state) ──
     const placeOrder = async (data: CheckoutForm) => {
@@ -160,7 +165,7 @@ export default function CheckoutPage() {
                 <ShoppingBag className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                 <h2 className="font-serif text-2xl text-slate-700 mb-2">Your cart is empty</h2>
                 <p className="text-slate-500 mb-6">Add some products before checking out.</p>
-                <a href="/shop" className="bg-orange-600 px-6 py-3 rounded-full font-semibold text-white transition-colors hover:bg-orange-700">Browse Shop</a>
+                <Link href="/shop" className="bg-orange-600 px-6 py-3 rounded-full font-semibold text-white transition-colors hover:bg-orange-700">Browse Shop</Link>
             </div>
         </div>
     )
@@ -170,7 +175,7 @@ export default function CheckoutPage() {
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h1 className="font-serif text-4xl text-slate-800 mb-10">Checkout</h1>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+                <form action={submitCheckout} className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
                     {/* ── Shipping Form ── */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white rounded-3xl border border-amber-50 shadow-sm p-8 space-y-5">
@@ -290,16 +295,17 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <button type="submit" disabled={isProcessing}
-                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-white flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${isNepal ? "bg-orange-600 hover:bg-orange-700" : "bg-[#25D366] hover:bg-[#20bd5a]"}`}>
-                                {isProcessing ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" /> {processingStep || "Processing…"}</>
-                                ) : isNepal ? (
+                            <FormStatusButton
+                                externalLoading={isProcessing}
+                                loadingText={processingStep || "Processing..."}
+                                className={`w-full font-semibold py-4 rounded-2xl transition-all shadow-lg text-white flex items-center justify-center gap-2 ${isNepal ? "bg-orange-600 hover:bg-orange-700" : "bg-[#25D366] hover:bg-[#20bd5a]"}`}
+                            >
+                                {isNepal ? (
                                     `Place Order — ${formatRs(total)}`
                                 ) : (
                                     <><MessageCircle className="w-5 h-5" /> Contact on WhatsApp</>
                                 )}
-                            </button>
+                            </FormStatusButton>
                         </div>
                     </div>
                 </form>

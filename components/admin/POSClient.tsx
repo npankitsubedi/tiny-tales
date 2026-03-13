@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { Search, ShoppingCart, Calculator, MonitorSmartphone, Printer } from "lucide-react"
 import { formatRs } from "@/lib/currency"
+import toast from "react-hot-toast"
 
 type POSProduct = {
     id: string
@@ -51,6 +52,10 @@ export default function POSClient({ products }: { products: POSProduct[] }) {
                 { id: product.id, title: product.title, qty: 1, price: product.price },
             ]
         })
+    }
+
+    const handleComingSoon = (label: string) => {
+        toast(`${label} is coming in the next update!`)
     }
 
     const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
@@ -163,14 +168,16 @@ export default function POSClient({ products }: { products: POSProduct[] }) {
                         <button
                             type="button"
                             disabled={cart.length === 0}
-                            className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-4 font-bold text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
+                            onClick={() => handleComingSoon("POS checkout")}
+                            className="flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-4 font-bold text-white transition-all duration-200 hover:bg-orange-700 active:scale-95 disabled:opacity-50"
                         >
                             <Calculator className="h-5 w-5" /> Pay
                         </button>
                         <button
                             type="button"
                             disabled={cart.length === 0}
-                            className="flex items-center justify-center gap-2 rounded-xl bg-gray-50 py-4 font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                            onClick={() => handleComingSoon("POS receipt printing")}
+                            className="flex items-center justify-center gap-2 rounded-xl bg-gray-50 py-4 font-bold text-slate-700 transition-all duration-200 hover:bg-gray-100 active:scale-95 disabled:opacity-50"
                         >
                             <Printer className="h-5 w-5" /> Print Bill
                         </button>

@@ -67,9 +67,9 @@ export default function OrderDetailLayout(props: OrderDetailProps) {
     const displayId = invoiceNumber ?? `#${id.slice(-8).toUpperCase()}`
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             {/* Sticky Top Header */}
-            <header className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+            <header className="admin-glass sticky top-0 z-50 border-b border-white/70 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.28)]">
                 <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <Link
@@ -79,6 +79,7 @@ export default function OrderDetailLayout(props: OrderDetailProps) {
                             <ArrowLeft className="w-4 h-4" />
                         </Link>
                         <div>
+                            <p className="admin-label mb-1">Order Intelligence</p>
                             <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                                 {displayId}
                                 {isInternational && (
@@ -110,7 +111,7 @@ export default function OrderDetailLayout(props: OrderDetailProps) {
             </header>
 
             {/* 2/3 + 1/3 Grid */}
-            <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-6">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* Left Column — 2/3 */}

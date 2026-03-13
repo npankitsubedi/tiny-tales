@@ -1,10 +1,15 @@
 "use client"
 
+import { useState } from "react"
 import { Download } from "lucide-react"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 export default function ExportButton({ data }: { data: any[] }) {
+    const [isExporting, setIsExporting] = useState(false)
+
     const handleExport = () => {
         if (!data || data.length === 0) return
+        setIsExporting(true)
 
         // Extract headers
         const headers = Object.keys(data[0]).join(",")
@@ -27,15 +32,18 @@ export default function ExportButton({ data }: { data: any[] }) {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+        window.setTimeout(() => setIsExporting(false), 300)
     }
 
     return (
-        <button
+        <LoadingButton
             onClick={handleExport}
+            isLoading={isExporting}
+            loadingText="Exporting..."
             className="inline-flex items-center justify-center p-2 px-4 bg-slate-800 hover:bg-slate-900 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
         >
             <Download className="h-4 w-4 mr-2" />
             Export CSV
-        </button>
+        </LoadingButton>
     )
 }

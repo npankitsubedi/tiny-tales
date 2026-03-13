@@ -4,12 +4,13 @@ import { useState } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Plus, Trash2, Loader2, Image as ImageIcon, X, Ruler } from "lucide-react"
+import { Plus, Trash2, Image as ImageIcon, X, Ruler } from "lucide-react"
 import { createProduct, createProductVariant, updateProduct, updateProductVariant } from "@/app/actions/inventory"
 import toast from "react-hot-toast"
 import { CldUploadWidget } from "next-cloudinary"
 import { useRouter } from "next/navigation"
 import { PRODUCT_CATEGORIES, ProductCategoryValue } from "@/lib/domain"
+import FormStatusButton from "@/components/ui/FormStatusButton"
 
 const AGE_RANGES = ["0-3 months", "3-6 months", "6-12 months", "12-18 months", "18-24 months", "2-3 years", "3-4 years", "4-5 years", "All ages"]
 
@@ -162,11 +163,15 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         }
     }
 
+    const submitProductForm = async () => {
+        await form.handleSubmit(onSubmit)()
+    }
+
     const inputCls = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8D9E6] focus:border-[#A8BDD0] bg-white placeholder:text-slate-300 transition"
     const labelCls = "block text-sm font-semibold text-slate-700 mb-1.5"
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form action={submitProductForm} className="space-y-8">
 
             {/* ─── Core Info ─── */}
             <section className="bg-white rounded-2xl border border-slate-100 p-6 space-y-5">
@@ -420,13 +425,13 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             </section>
 
             {/* ─── Submit ─── */}
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 bg-primary hover:opacity-90 disabled:opacity-60 text-primary-foreground font-bold py-4 rounded-2xl text-base transition-all shadow-lg active:scale-[0.99]"
+            <FormStatusButton
+                externalLoading={isSubmitting}
+                loadingText={isEditMode ? "Saving Product..." : "Creating Product..."}
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:opacity-90 text-primary-foreground font-bold py-4 rounded-2xl text-base transition-all shadow-lg active:scale-[0.99]"
             >
-                {isSubmitting ? <><Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Saving Product...</> : "Create Product"}
-            </button>
+                {isEditMode ? "Save Product" : "Create Product"}
+            </FormStatusButton>
         </form>
     )
 }

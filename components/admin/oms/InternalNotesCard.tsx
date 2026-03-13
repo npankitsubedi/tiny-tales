@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { StickyNote, Loader2, Save } from "lucide-react"
+import { useState, useTransition } from "react"
+import { StickyNote, Save } from "lucide-react"
 import toast from "react-hot-toast"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 interface InternalNotesCardProps {
     orderId: string
@@ -12,21 +13,21 @@ interface InternalNotesCardProps {
 
 export default function InternalNotesCard({ orderId, initialNotes, onSave }: InternalNotesCardProps) {
     const [notes, setNotes] = useState(initialNotes ?? "")
-    const [isSaving, setIsSaving] = useState(false)
     const [savedVersion, setSavedVersion] = useState(initialNotes ?? "")
+    const [isPending, startTransition] = useTransition()
     const isDirty = notes !== savedVersion
     const MAX = 500
 
-    const handleSave = async () => {
-        setIsSaving(true)
-        const res = await onSave(orderId, notes)
-        if (res.success) {
-            setSavedVersion(notes)
-            toast.success("Notes saved")
-        } else {
-            toast.error(res.error ?? "Failed to save notes")
-        }
-        setIsSaving(false)
+    const handleSave = () => {
+        startTransition(async () => {
+            const res = await onSave(orderId, notes)
+            if (res.success) {
+                setSavedVersion(notes)
+                toast.success("Notes saved")
+            } else {
+                toast.error(res.error ?? "Failed to save notes")
+            }
+        })
     }
 
     return (
@@ -38,6 +39,7 @@ export default function InternalNotesCard({ orderId, initialNotes, onSave }: Int
             <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value.slice(0, MAX))}
+                disabled={isPending}
                 placeholder="e.g. Customer requested gift wrap. Handle with care."
                 rows={4}
                 className="w-full text-sm text-slate-700 placeholder:text-slate-300 bg-slate-50 border border-slate-200 rounded-xl p-3.5 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition-all"
@@ -47,18 +49,16 @@ export default function InternalNotesCard({ orderId, initialNotes, onSave }: Int
                 <span className={`text-[11px] ${notes.length >= MAX ? "text-rose-500" : "text-slate-400"}`}>
                     {notes.length}/{MAX}
                 </span>
-                <button
+                <LoadingButton
                     onClick={handleSave}
-                    disabled={!isDirty || isSaving}
+                    isLoading={isPending}
+                    disabled={!isDirty || isPending}
+                    loadingText="Saving..."
                     className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-orange-600 hover:bg-orange-700 active:scale-95 text-white rounded-lg transition-all disabled:opacity-40"
                 >
-                    {isSaving ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                        <Save className="w-3.5 h-3.5" />
-                    )}
-                    {isSaving ? "Saving…" : "Save Note"}
-                </button>
+                    <Save className="w-3.5 h-3.5" />
+                    Save Note
+                </LoadingButton>
             </div>
         </div>
     )

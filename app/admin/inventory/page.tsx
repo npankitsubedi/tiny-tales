@@ -66,18 +66,19 @@ export default async function InventoryPage() {
     const { products, lowStockVariants } = await getInventoryData()
 
     return (
-        <div className="min-h-screen bg-slate-50/50 p-6 md:p-12 font-sans text-slate-800">
+        <div className="min-h-screen p-6 md:p-12 font-sans text-slate-800">
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header Section */}
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-6">
+                <header className="admin-glass sticky top-0 z-30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-[1.75rem] border border-white/70 px-6 py-5 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.28)]">
                     <div>
+                        <p className="admin-label mb-2">Inventory Ops</p>
                         <h1 className="text-3xl font-serif text-slate-800 tracking-tight">Inventory Command Center</h1>
                         <p className="text-slate-500 mt-1">Real-time stock monitoring and catalog management.</p>
                     </div>
                     <Link
                         href="/admin/inventory/new"
-                        className="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-xl transition-opacity shadow-sm"
+                        className="inline-flex items-center justify-center px-5 py-2.5 bg-primary hover:opacity-90 text-primary-foreground font-medium rounded-2xl transition-all shadow-[0_14px_28px_-18px_rgba(234,88,12,0.95)]"
                     >
                         <Plus className="h-5 w-5 mr-1.5" />
                         Add New Product

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
-import { CheckCircle2, Circle, Loader2 } from "lucide-react"
+import { useState, useTransition } from "react"
+import { CheckCircle2, Circle } from "lucide-react"
 import toast from "react-hot-toast"
 import { OrderStatusValue } from "@/lib/domain"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 const STEPS: { status: OrderStatusValue; label: string; short: string }[] = [
     { status: "PENDING", label: "Order Received", short: "Pending" },
@@ -33,36 +34,41 @@ interface StatusStepperProps {
 
 export default function StatusStepper({ orderId, initialStatus, onStatusChange, onCancel }: StatusStepperProps) {
     const [currentStatus, setCurrentStatus] = useState(initialStatus)
-    const [isLoading, setIsLoading] = useState(false)
+    const [pendingAction, setPendingAction] = useState<"advance" | "cancel" | null>(null)
+    const [isPending, startTransition] = useTransition()
 
     const isCancelled = currentStatus === "CANCELED" || currentStatus === "RETURNED"
     const currentIndex = STATUS_ORDER.indexOf(currentStatus)
     const advance = ADVANCE_MAP[currentStatus]
 
-    const handleAdvance = async () => {
+    const handleAdvance = () => {
         if (!advance) return
-        setIsLoading(true)
-        const result = await onStatusChange(orderId, advance.next)
-        if (result.success) {
-            setCurrentStatus(advance.next)
-            toast.success(`Status advanced to ${advance.next.replace(/_/g, " ")}`)
-        } else {
-            toast.error(result.error ?? "Failed to update status")
-        }
-        setIsLoading(false)
+        setPendingAction("advance")
+        startTransition(async () => {
+            const result = await onStatusChange(orderId, advance.next)
+            if (result.success) {
+                setCurrentStatus(advance.next)
+                toast.success(`Status advanced to ${advance.next.replace(/_/g, " ")}`)
+            } else {
+                toast.error(result.error ?? "Failed to update status")
+            }
+            setPendingAction(null)
+        })
     }
 
-    const handleCancel = async () => {
+    const handleCancel = () => {
         if (!confirm("Cancel this order? Stock will not be automatically restocked.")) return
-        setIsLoading(true)
-        const result = await onCancel(orderId)
-        if (result.success) {
-            setCurrentStatus("CANCELED")
-            toast.success("Order cancelled")
-        } else {
-            toast.error(result.error ?? "Failed to cancel order")
-        }
-        setIsLoading(false)
+        setPendingAction("cancel")
+        startTransition(async () => {
+            const result = await onCancel(orderId)
+            if (result.success) {
+                setCurrentStatus("CANCELED")
+                toast.success("Order cancelled")
+            } else {
+                toast.error(result.error ?? "Failed to cancel order")
+            }
+            setPendingAction(null)
+        })
     }
 
     return (
@@ -130,26 +136,27 @@ export default function StatusStepper({ orderId, initialStatus, onStatusChange, 
                     {/* Action Buttons */}
                     <div className="flex gap-3 mt-6 pt-4 border-t border-slate-100">
                         {advance && (
-                            <button
+                            <LoadingButton
                                 onClick={handleAdvance}
-                                disabled={isLoading}
+                                isLoading={isPending && pendingAction === "advance"}
+                                disabled={isPending}
+                                loadingText={advance.label}
                                 className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 shadow-sm shadow-orange-500/30"
                             >
-                                {isLoading ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    advance.label
-                                )}
-                            </button>
+                                {advance.label}
+                            </LoadingButton>
                         )}
                         {currentStatus !== "DELIVERED" && !isCancelled && (
-                            <button
+                            <LoadingButton
                                 onClick={handleCancel}
-                                disabled={isLoading}
+                                isLoading={isPending && pendingAction === "cancel"}
+                                disabled={isPending}
+                                loadingText="Cancelling..."
+                                loadingClassName="bg-rose-600 border-rose-600 text-white hover:bg-rose-600"
                                 className="px-4 py-2.5 text-rose-600 hover:bg-rose-50 border border-rose-200 text-sm font-semibold rounded-xl transition-all disabled:opacity-50"
                             >
                                 Cancel Order
-                            </button>
+                            </LoadingButton>
                         )}
                         {currentStatus === "DELIVERED" && (
                             <p className="text-sm text-emerald-600 font-semibold flex items-center gap-2">

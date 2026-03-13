@@ -7,6 +7,7 @@ import { X, Check } from "lucide-react"
 import toast from "react-hot-toast"
 import { capturePayment } from "@/app/actions/sales" // Next.js Server Action
 import { OrderStatusValue } from "@/lib/domain"
+import FormStatusButton from "@/components/ui/FormStatusButton"
 
 interface SalesCommandCenterClientProps {
     initialOrders: any[]
@@ -22,12 +23,10 @@ export default function SalesCommandCenterClient({ initialOrders, updateStatusAc
         ? initialOrders.find(o => o.id === selectedOrderId)
         : null
 
-    const handleCapturePayment = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+    const submitCapturePayment = async (formData: FormData) => {
         if (!paymentModalOrderId) return
 
         setIsCapturing(true)
-        const formData = new FormData(e.currentTarget)
         const method = formData.get("paymentMethod") as string
 
         const res = await capturePayment(paymentModalOrderId, method)
@@ -57,15 +56,15 @@ export default function SalesCommandCenterClient({ initialOrders, updateStatusAc
 
             {/* Payment Capture Modal */}
             {paymentModalOrderId && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setPaymentModalOrderId(null)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => { if (!isCapturing) setPaymentModalOrderId(null) }}>
                     <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-[#F5F5F5]">
                             <h3 className="font-bold text-slate-800 text-lg">Capture Payment</h3>
-                            <button onClick={() => setPaymentModalOrderId(null)} className="p-1 text-slate-400 hover:bg-slate-200 rounded-lg transition-colors">
+                            <button disabled={isCapturing} onClick={() => setPaymentModalOrderId(null)} className="p-1 text-slate-400 hover:bg-slate-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <form onSubmit={handleCapturePayment} className="p-6">
+                        <form action={submitCapturePayment} className="p-6">
                             <p className="text-sm text-slate-500 mb-6">
                                 Please select the payment ledger/method used by the customer to settle this order. This will officially mark the Invoice as PAID.
                             </p>
@@ -85,13 +84,13 @@ export default function SalesCommandCenterClient({ initialOrders, updateStatusAc
                                 ))}
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={isCapturing}
-                                className="w-full py-3.5 bg-primary hover:opacity-90 disabled:opacity-50 text-primary-foreground font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                            <FormStatusButton
+                                externalLoading={isCapturing}
+                                loadingText="Processing..."
+                                className="w-full py-3.5 bg-primary hover:opacity-90 text-primary-foreground font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                             >
-                                {isCapturing ? "Processing..." : <><Check className="w-5 h-5" /> Confirm Capture</>}
-                            </button>
+                                <Check className="w-5 h-5" /> Confirm Capture
+                            </FormStatusButton>
                         </form>
                     </div>
                 </div>

@@ -32,9 +32,9 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
     });
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="admin-surface rounded-[1.75rem] overflow-hidden">
             {/* Toolbar */}
-            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between gap-4">
                 <div className="relative w-full max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
@@ -42,10 +42,10 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
                         placeholder="Search by name, email, or phone..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
+                        className="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-2xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
                     />
                 </div>
-                <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                <div className="admin-label bg-white px-3 py-2 rounded-2xl border border-slate-200 whitespace-nowrap">
                     {filtered.length} {filtered.length === 1 ? 'Customer' : 'Customers'}
                 </div>
             </div>
@@ -54,12 +54,12 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                     <thead>
-                        <tr className="bg-white border-b border-slate-100">
-                            <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Customer</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Contact</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Orders</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Lifetime Value</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Joined</th>
+                        <tr className="bg-white/80 border-b border-slate-100">
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Customer</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Contact</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em] text-center">Orders</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em] text-right">Lifetime Value</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em] text-right">Joined</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -71,7 +71,7 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
                             </tr>
                         ) : (
                             filtered.map((customer) => (
-                                <tr key={customer.id} className="hover:bg-slate-50/80 transition-colors group cursor-pointer relative">
+                                <tr key={customer.id} className="hover:bg-white/90 hover:shadow-sm transition-all duration-200 group cursor-pointer relative">
                                     <td className="px-6 py-4 min-w-[200px]">
                                         <Link href={`/admin/customers/${customer.id}`} className="absolute inset-0 z-10">
                                             <span className="sr-only">View {customer.name}</span>
@@ -90,11 +90,11 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="font-bold text-slate-700">
+                                        <span className="admin-figure font-bold text-slate-700 tabular-nums">
                                             {formatRsCompact(customer.lifetimeValue)}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-slate-500 font-medium">
+                                    <td className="px-6 py-4 text-right text-slate-500 font-medium tabular-nums">
                                         {new Date(customer.joinedDate).toLocaleDateString('en-IN', {
                                             month: 'short',
                                             day: 'numeric',

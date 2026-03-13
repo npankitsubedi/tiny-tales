@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { X, Save, Edit3 } from 'lucide-react';
 import { updateCustomerProfile } from '@/app/actions/crm';
 import { useRouter } from 'next/navigation';
+import FormStatusButton from '@/components/ui/FormStatusButton';
 
 const editSchema = z.object({
     id: z.string(),
@@ -73,6 +74,10 @@ export default function EditCustomerModal({ customer }: EditCustomerModalProps) 
         router.refresh();
     };
 
+    const submitCustomerForm = async () => {
+        await handleSubmit(onSubmit)();
+    };
+
     if (!isOpen) {
         return (
             <button
@@ -112,7 +117,7 @@ export default function EditCustomerModal({ customer }: EditCustomerModalProps) 
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                    <form action={submitCustomerForm} className="space-y-5">
                         <input type="hidden" {...register("id")} />
 
                         <div>
@@ -154,20 +159,14 @@ export default function EditCustomerModal({ customer }: EditCustomerModalProps) 
                         </div>
 
                         <div className="pt-2">
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-orange-600/20 flex items-center justify-center gap-2"
+                            <FormStatusButton
+                                externalLoading={isSubmitting}
+                                loadingText="Saving Changes..."
+                                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-orange-600/20 flex items-center justify-center gap-2"
                             >
-                                {isSubmitting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    <>
-                                        <Save className="w-4 h-4" />
-                                        Save Changes
-                                    </>
-                                )}
-                            </button>
+                                <Save className="w-4 h-4" />
+                                Save Changes
+                            </FormStatusButton>
                         </div>
                     </form>
                 </div>

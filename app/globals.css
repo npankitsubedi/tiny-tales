@@ -52,6 +52,10 @@
     --muted: #f9fafb;
     --border: #e5e7eb;
     --ring: #fdba74;
+    --admin-canvas: #f5f5f5;
+    --admin-surface: rgba(255, 255, 255, 0.9);
+    --admin-shadow: 0 12px 40px -18px rgba(15, 23, 42, 0.16);
+    --admin-shadow-lg: 0 24px 48px -24px rgba(15, 23, 42, 0.2);
 }
 
 *,
@@ -119,6 +123,94 @@ a,
     min-width: 44px;
 }
 
+[data-admin-ui] button,
+[data-admin-ui] a,
+[data-admin-ui] [role="button"] {
+    transition-property: all;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+}
+
+[data-admin-ui] {
+    background:
+        radial-gradient(circle at top left, rgba(234, 88, 12, 0.08), transparent 22rem),
+        radial-gradient(circle at top right, rgba(15, 23, 42, 0.05), transparent 20rem),
+        var(--admin-canvas);
+}
+
+[data-admin-ui] main {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.42)),
+        transparent;
+}
+
+[data-admin-ui] button:active,
+[data-admin-ui] a:active,
+[data-admin-ui] [role="button"]:active {
+    transform: scale(0.98);
+}
+
+[data-admin-ui] button.bg-orange-600:hover,
+[data-admin-ui] a.bg-orange-600:hover {
+    background-color: #c2410c;
+}
+
+[data-admin-ui] button.bg-white:hover,
+[data-admin-ui] a.bg-white:hover,
+[data-admin-ui] button.bg-gray-50:hover,
+[data-admin-ui] a.bg-gray-50:hover {
+    background-color: #f3f4f6;
+}
+
+[data-admin-ui] input,
+[data-admin-ui] select,
+[data-admin-ui] textarea {
+    transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+
+[data-admin-ui] input:focus,
+[data-admin-ui] select:focus,
+[data-admin-ui] textarea:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.14);
+}
+
+[data-admin-ui] tr {
+    transition: all 200ms ease-in-out;
+}
+
+[data-admin-ui] .admin-glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-admin-ui] .admin-surface {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+    box-shadow: var(--admin-shadow);
+}
+
+[data-admin-ui] .admin-surface-strong {
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+[data-admin-ui] .admin-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    color: #64748b;
+}
+
+[data-admin-ui] .admin-figure {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+}
+
 /* Override for purely decorative/inline elements */
 .touch-auto {
     min-height: unset;
@@ -151,7 +243,7 @@ a,
 }
 
 .skeleton {
-    background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.5s ease-in-out infinite;
     border-radius: 0.5rem;

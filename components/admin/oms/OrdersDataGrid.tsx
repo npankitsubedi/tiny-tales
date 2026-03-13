@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { formatRs } from "@/lib/currency"
 import { FulfillmentPill, PaymentPill } from "@/components/admin/oms/StatusPill"
-import { ChevronRight, Package, XCircle, Banknote, Check, Loader2, X } from "lucide-react"
+import { ChevronRight, Package, XCircle, Banknote, Check, X } from "lucide-react"
 import toast from "react-hot-toast"
 import { OrderStatusValue } from "@/lib/domain"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 type GridOrder = {
     id: string
@@ -40,10 +41,11 @@ const STATUS_NEXT: Partial<Record<OrderStatusValue, { label: string; next: Order
 
 export default function OrdersDataGrid({ orders, onStatusChange, onCapturePayment }: OrdersDataGridProps) {
     const [localOrders, setLocalOrders] = useState(orders)
-    const [loadingId, setLoadingId] = useState<string | null>(null)
+    const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
+    const [pendingAction, setPendingAction] = useState<"advance" | "cancel" | "capture" | null>(null)
     const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null)
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
-    const [isCapturing, setIsCapturing] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
     const paymentOptions = [
         { id: "Cash", label: "Cash" },
@@ -53,36 +55,44 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
         { id: "Cheque", label: "Cheque" },
     ]
 
-    const handleAdvance = async (e: React.MouseEvent, order: GridOrder) => {
+    const handleAdvance = (e: React.MouseEvent, order: GridOrder) => {
         e.stopPropagation()
         const action = STATUS_NEXT[order.status]
         if (!action) return
 
-        setLoadingId(order.id)
-        const result = await onStatusChange(order.id, action.next)
-        if (result.success) {
-            setLocalOrders(prev =>
-                prev.map(o => o.id === order.id ? { ...o, status: action.next } : o)
-            )
-            toast.success(`Advanced to ${action.next.replace(/_/g, " ")}`)
-        } else {
-            toast.error(result.error ?? "Failed to update status")
-        }
-        setLoadingId(null)
+        setPendingOrderId(order.id)
+        setPendingAction("advance")
+        startTransition(async () => {
+            const result = await onStatusChange(order.id, action.next)
+            if (result.success) {
+                setLocalOrders(prev =>
+                    prev.map(o => o.id === order.id ? { ...o, status: action.next } : o)
+                )
+                toast.success(`Advanced to ${action.next.replace(/_/g, " ")}`)
+            } else {
+                toast.error(result.error ?? "Failed to update status")
+            }
+            setPendingOrderId(null)
+            setPendingAction(null)
+        })
     }
 
-    const handleCancel = async (e: React.MouseEvent, orderId: string) => {
+    const handleCancel = (e: React.MouseEvent, orderId: string) => {
         e.stopPropagation()
         if (!confirm("Cancel this order? This cannot be undone.")) return
-        setLoadingId(orderId)
-        const result = await onStatusChange(orderId, "CANCELED")
-        if (result.success) {
-            setLocalOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "CANCELED" } : o))
-            toast.success("Order cancelled")
-        } else {
-            toast.error(result.error ?? "Failed to cancel order")
-        }
-        setLoadingId(null)
+        setPendingOrderId(orderId)
+        setPendingAction("cancel")
+        startTransition(async () => {
+            const result = await onStatusChange(orderId, "CANCELED")
+            if (result.success) {
+                setLocalOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "CANCELED" } : o))
+                toast.success("Order cancelled")
+            } else {
+                toast.error(result.error ?? "Failed to cancel order")
+            }
+            setPendingOrderId(null)
+            setPendingAction(null)
+        })
     }
 
     if (localOrders.length === 0) {
@@ -100,13 +110,13 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-slate-100 bg-slate-50/80">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Payment</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fulfillment</th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Order</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Date</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Customer</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Payment</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Fulfillment</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Total</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-[0.16em]">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -116,12 +126,12 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                         const isCOD = order.paymentMethod === "Cash on Delivery"
                         const needsPayment = isCOD && order.invoice?.status !== "PAID" && order.status === "DELIVERED"
                         const paymentStatus = (order.invoice?.status ?? "UNPAID") as "PAID" | "UNPAID" | "OVERDUE" | "CANCELLED"
-                        const isLoading = loadingId === order.id
+                        const rowPending = isPending && pendingOrderId === order.id
 
                         return (
                             <tr
                                 key={order.id}
-                                className="group hover:bg-orange-50/20 transition-colors"
+                                className="group hover:bg-white/90 transition-all duration-200"
                             >
                                 {/* Order ID */}
                                 <td className="px-4 py-4">
@@ -135,7 +145,7 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                                 </td>
 
                                 {/* Date */}
-                                <td className="px-4 py-4 text-slate-500 whitespace-nowrap">
+                                <td className="px-4 py-4 text-slate-500 whitespace-nowrap tabular-nums">
                                     {format(new Date(order.createdAt), "MMM d, yyyy")}
                                 </td>
 
@@ -173,36 +183,41 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                                 <td className="px-4 py-4">
                                     <div className="flex items-center justify-end gap-2">
                                         {needsPayment && (
-                                            <button
+                                            <LoadingButton
                                                 onClick={(e) => {
                                                     e.stopPropagation()
                                                     setPaymentOrderId(order.id)
                                                     setSelectedMethod(null)
                                                 }}
+                                                disabled={rowPending}
                                                 className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors"
                                             >
                                                 <Banknote className="w-3.5 h-3.5" />
                                                 Collect
-                                            </button>
+                                            </LoadingButton>
                                         )}
                                         {advanceAction && order.status !== "CANCELED" && (
-                                            <button
+                                            <LoadingButton
                                                 onClick={(e) => handleAdvance(e, order)}
-                                                disabled={isLoading}
+                                                isLoading={rowPending && pendingAction === "advance"}
+                                                disabled={rowPending}
+                                                loadingText={advanceAction.label}
                                                 className="px-3 py-1.5 text-xs font-semibold bg-orange-600 hover:bg-orange-700 active:scale-95 text-white rounded-lg transition-all disabled:opacity-50"
                                             >
-                                                {isLoading ? "…" : advanceAction.label}
-                                            </button>
+                                                {advanceAction.label}
+                                            </LoadingButton>
                                         )}
                                         {order.status !== "CANCELED" && order.status !== "DELIVERED" && (
-                                            <button
+                                            <LoadingButton
                                                 onClick={(e) => handleCancel(e, order.id)}
-                                                disabled={isLoading}
+                                                isLoading={rowPending && pendingAction === "cancel"}
+                                                disabled={rowPending}
+                                                loadingClassName="bg-rose-600 text-white hover:bg-rose-600"
                                                 className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                                                 title="Cancel order"
                                             >
                                                 <XCircle className="w-4 h-4" />
-                                            </button>
+                                            </LoadingButton>
                                         )}
                                     </div>
                                 </td>
@@ -216,7 +231,7 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
                     onClick={() => {
-                        if (!isCapturing) {
+                        if (!isPending) {
                             setPaymentOrderId(null)
                             setSelectedMethod(null)
                         }
@@ -228,18 +243,19 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                     >
                         <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
                             <h3 className="text-lg font-bold text-slate-800">Capture Payment</h3>
-                            <button
+                            <LoadingButton
                                 type="button"
                                 onClick={() => {
-                                    if (!isCapturing) {
+                                    if (!isPending) {
                                         setPaymentOrderId(null)
                                         setSelectedMethod(null)
                                     }
                                 }}
+                                disabled={isPending}
                                 className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-200"
                             >
                                 <X className="h-5 w-5" />
-                            </button>
+                            </LoadingButton>
                         </div>
 
                         <div className="space-y-4 p-6">
@@ -270,44 +286,50 @@ export default function OrdersDataGrid({ orders, onStatusChange, onCapturePaymen
                                 ))}
                             </div>
 
-                            <button
+                            <LoadingButton
                                 type="button"
-                                disabled={!selectedMethod || isCapturing}
-                                onClick={async () => {
+                                disabled={!selectedMethod}
+                                isLoading={isPending && pendingAction === "capture"}
+                                loadingText="Capturing..."
+                                onClick={() => {
                                     if (!paymentOrderId || !selectedMethod) return
 
-                                    setIsCapturing(true)
-                                    const result = await onCapturePayment(paymentOrderId, selectedMethod)
+                                    setPendingOrderId(paymentOrderId)
+                                    setPendingAction("capture")
+                                    startTransition(async () => {
+                                        const result = await onCapturePayment(paymentOrderId, selectedMethod)
 
-                                    if (!result.success) {
-                                        toast.error(result.error ?? "Failed to capture payment")
-                                        setIsCapturing(false)
-                                        return
-                                    }
+                                        if (!result.success) {
+                                            toast.error(result.error ?? "Failed to capture payment")
+                                            setPendingOrderId(null)
+                                            setPendingAction(null)
+                                            return
+                                        }
 
-                                    setLocalOrders((currentOrders) =>
-                                        currentOrders.map((currentOrder) =>
-                                            currentOrder.id === paymentOrderId
-                                                ? {
-                                                    ...currentOrder,
-                                                    paymentMethod: selectedMethod,
-                                                    invoice: currentOrder.invoice
-                                                        ? { ...currentOrder.invoice, status: "PAID" }
-                                                        : null,
-                                                }
-                                                : currentOrder
+                                        setLocalOrders((currentOrders) =>
+                                            currentOrders.map((currentOrder) =>
+                                                currentOrder.id === paymentOrderId
+                                                    ? {
+                                                        ...currentOrder,
+                                                        paymentMethod: selectedMethod,
+                                                        invoice: currentOrder.invoice
+                                                            ? { ...currentOrder.invoice, status: "PAID" }
+                                                            : null,
+                                                    }
+                                                    : currentOrder
+                                            )
                                         )
-                                    )
-                                    toast.success("Payment captured successfully")
-                                    setPaymentOrderId(null)
-                                    setSelectedMethod(null)
-                                    setIsCapturing(false)
+                                        toast.success("Payment captured successfully")
+                                        setPaymentOrderId(null)
+                                        setSelectedMethod(null)
+                                        setPendingOrderId(null)
+                                        setPendingAction(null)
+                                    })
                                 }}
                                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 py-3 font-semibold text-white transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
                                 Confirm Capture
-                            </button>
+                            </LoadingButton>
                         </div>
                     </div>
                 </div>

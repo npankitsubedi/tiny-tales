@@ -1,9 +1,11 @@
 "use client"
 
+import Link from "next/link"
 import { X, ExternalLink, MapPin, Phone, User, Calendar, MessageCircle, FileText } from "lucide-react"
 import { useEffect } from "react"
 import { format } from "date-fns"
 import { formatRs } from "@/lib/currency"
+import toast from "react-hot-toast"
 
 type ExpandedOrderItem = {
     id: string
@@ -30,7 +32,7 @@ type ExpandedOrder = {
     totalAmount: number
     taxAmount: number
     orderItems: ExpandedOrderItem[]
-    invoice: { invoiceNumber: string } | null
+    invoice: { id?: string; invoiceNumber: string } | null
 }
 
 interface OrderDetailModalProps {
@@ -51,6 +53,8 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
     }, [isOpen])
 
     if (!isOpen || !order) return null
+
+    const invoiceHref = order.invoice?.id ? `/admin/sales/invoice/${order.invoice.id}` : null
 
     // WhatsApp logic dynamically formatted
     const handleWhatsApp = () => {
@@ -101,6 +105,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                         </p>
                     </div>
                     <button
+                        type="button"
                         onClick={onClose}
                         className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-400 hover:text-slate-600"
                     >
@@ -143,6 +148,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                             {/* WhatsApp Prompt rendering absolutely matching aesthetic bounds */}
                             {order.isInternational && (
                                 <button
+                                    type="button"
                                     onClick={handleWhatsApp}
                                     className="w-full mt-4 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium py-2.5 rounded-xl transition-all shadow-sm shadow-[#25D366]/20"
                                 >
@@ -222,9 +228,22 @@ export default function OrderDetailModal({ order, isOpen, onClose }: OrderDetail
                     <span className={`px-3 py-1 text-xs font-medium rounded-full uppercase tracking-wider bg-slate-200 text-slate-700`}>
                         {order.status}
                     </span>
-                    <button className="text-sm font-medium text-blue-600 hover:text-blue-700 px-4 py-2 hover:bg-blue-50 rounded-xl transition-all flex items-center gap-1.5">
-                        Download PDF <ExternalLink className="w-3.5 h-3.5" />
-                    </button>
+                    {invoiceHref ? (
+                        <Link
+                            href={invoiceHref}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 px-4 py-2 hover:bg-blue-50 active:scale-95 rounded-xl transition-all duration-200 flex items-center gap-1.5"
+                        >
+                            Download PDF <ExternalLink className="w-3.5 h-3.5" />
+                        </Link>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => toast("Invoice PDF will be available in the next update.")}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 px-4 py-2 hover:bg-blue-50 active:scale-95 rounded-xl transition-all duration-200 flex items-center gap-1.5"
+                        >
+                            Download PDF <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                    )}
                 </div>
 
             </div>

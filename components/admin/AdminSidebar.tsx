@@ -47,13 +47,13 @@ export default function AdminSidebar() {
                         key={href}
                         href={href}
                         onClick={onNavClick}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group
+                        className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-medium transition-all group
                             ${active
-                                ? "bg-primary text-primary-foreground shadow-sm shadow-[#D9E9F2]"
-                                : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"}`}
+                                ? "bg-orange-600 text-white shadow-[0_12px_24px_-18px_rgba(234,88,12,0.9)]"
+                                : "text-slate-500 hover:bg-white hover:shadow-sm hover:text-slate-900"}`}
                         aria-current={active ? "page" : undefined}
                     >
-                        <Icon className={`w-5 h-5 shrink-0 ${active ? "text-slate-700" : "text-slate-400 group-hover:text-[#2D5068]"}`} aria-hidden="true" />
+                        <Icon className={`w-5 h-5 shrink-0 ${active ? "text-orange-100" : "text-slate-400 group-hover:text-orange-600"}`} aria-hidden="true" />
                         <span className={`truncate transition-all ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}>{label}</span>
                     </Link>
                 )
@@ -65,19 +65,19 @@ export default function AdminSidebar() {
         <>
             {/* ── Desktop Sidebar ── */}
             <aside
-                className={`hidden md:flex flex-col h-screen sticky top-0 bg-white border-r border-slate-100 shadow-sm transition-all duration-300 shrink-0 ${collapsed ? "w-16" : "w-56"}`}
+                className={`admin-glass hidden md:flex flex-col h-screen sticky top-0 border-r border-white/60 shadow-[0_18px_40px_-24px_rgba(15,23,42,0.35)] transition-all duration-300 shrink-0 ${collapsed ? "w-16" : "w-60"}`}
                 aria-label="Admin navigation"
             >
                 {/* Brand Header */}
-                <div className={`flex items-center gap-2.5 px-4 py-5 border-b border-slate-100 ${collapsed ? "justify-center" : ""}`}>
-                    <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center shrink-0">
-                        <Baby className="w-4 h-4 text-primary" aria-hidden="true" />
+                <div className={`flex items-center gap-3 px-4 py-5 border-b border-slate-200/70 ${collapsed ? "justify-center" : ""}`}>
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-[0_12px_20px_-12px_rgba(234,88,12,0.9)] flex items-center justify-center shrink-0">
+                        <Baby className="w-5 h-5 text-white" aria-hidden="true" />
                     </div>
                     {!collapsed && (
-                        <span className="font-bold text-slate-800 text-sm leading-tight">
-                            Tiny Tales<br />
-                            <span className="text-[10px] font-normal text-slate-400 tracking-wider uppercase">Admin Panel</span>
-                        </span>
+                        <div className="leading-tight">
+                            <p className="font-semibold text-slate-900 text-sm">Tiny Tales</p>
+                            <p className="text-[10px] font-semibold text-slate-500 tracking-[0.24em] uppercase">Admin Panel</p>
+                        </div>
                     )}
                 </div>
 
@@ -87,10 +87,10 @@ export default function AdminSidebar() {
                 </div>
 
                 {/* Collapse Toggle */}
-                <div className="border-t border-slate-100 py-3 px-2">
+                <div className="border-t border-slate-200/70 py-3 px-2">
                     <button
                         onClick={() => setCollapsed(v => !v)}
-                        className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors text-xs font-medium"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-white hover:shadow-sm transition-colors text-xs font-semibold tracking-wide"
                         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     >
                         {collapsed
@@ -104,7 +104,7 @@ export default function AdminSidebar() {
             {/* ── Mobile Hamburger Trigger ── */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 bg-white shadow-md border border-slate-100 rounded-xl flex items-center justify-center text-slate-700"
+                className="admin-glass md:hidden fixed top-4 left-4 z-50 w-11 h-11 shadow-lg border border-white/70 rounded-2xl flex items-center justify-center text-slate-700"
                 aria-label="Open navigation menu"
             >
                 <Menu className="w-5 h-5" aria-hidden="true" />
@@ -121,19 +121,22 @@ export default function AdminSidebar() {
                     />
                     {/* Slide-in Drawer */}
                     <aside
-                        className="md:hidden fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-50 flex flex-col"
+                        className="admin-glass md:hidden fixed top-0 left-0 h-full w-72 shadow-2xl z-50 flex flex-col border-r border-white/60"
                         aria-label="Mobile admin navigation"
                     >
-                        <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100">
+                        <div className="flex items-center justify-between px-4 py-5 border-b border-slate-200/70">
                             <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center">
-                                    <Baby className="w-4 h-4 text-primary" aria-hidden="true" />
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-[0_12px_20px_-12px_rgba(234,88,12,0.9)]">
+                                    <Baby className="w-5 h-5 text-white" aria-hidden="true" />
                                 </div>
-                                <span className="font-bold text-slate-800 text-sm">Tiny Tales Admin</span>
+                                <div className="leading-tight">
+                                    <p className="font-semibold text-slate-900 text-sm">Tiny Tales</p>
+                                    <p className="text-[10px] font-semibold text-slate-500 tracking-[0.24em] uppercase">Admin Panel</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setMobileOpen(false)}
-                                className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                                className="w-9 h-9 flex items-center justify-center rounded-2xl text-slate-400 hover:text-slate-700 hover:bg-white hover:shadow-sm transition-colors"
                                 aria-label="Close navigation menu"
                             >
                                 <X className="w-4 h-4" aria-hidden="true" />

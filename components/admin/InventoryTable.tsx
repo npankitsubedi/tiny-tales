@@ -59,11 +59,12 @@ export default function InventoryTable({ products }: { products: Product[] }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
+            className="admin-surface rounded-[1.75rem] overflow-hidden"
         >
             {/* Table Header & Search */}
             <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
+                    <p className="admin-label mb-2">Inventory Snapshot</p>
                     <h2 className="text-xl font-semibold text-slate-800 tracking-tight">Catalog Overview</h2>
                     <p className="text-sm text-slate-500 mt-1">Manage and monitor all your product variants.</p>
                 </div>
@@ -75,7 +76,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                         placeholder="Search by title or SKU..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#C8D9E6]/20 focus:border-[#A8BDD0] transition-all"
+                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
                     />
                 </div>
             </div>
@@ -84,7 +85,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                        <tr className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500 font-medium">
+                        <tr className="bg-slate-50/80 border-b border-slate-100 text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">
                             <th className="px-6 py-4">Product</th>
                             <th className="px-6 py-4">Total Stock</th>
                             <th className="px-6 py-4">Status</th>
@@ -101,7 +102,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                             </tr>
                         ) : (
                             filteredProducts.map((product) => (
-                                <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
+                                <tr key={product.id} className="hover:bg-white/90 hover:shadow-sm transition-all duration-200 group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0 text-slate-400">
@@ -114,7 +115,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="text-slate-700 font-medium">
+                                        <span className="admin-figure text-slate-700 font-semibold tabular-nums">
                                             {product.variants.reduce((sum, v) => sum + v.stockCount, 0)} units
                                         </span>
                                     </td>
@@ -123,7 +124,7 @@ export default function InventoryTable({ products }: { products: Product[] }) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-800 font-medium">{formatRs(product.basePrice)}</span>
+                                            <span className="admin-figure text-slate-800 font-semibold tabular-nums">{formatRs(product.basePrice)}</span>
                                             <span className="text-xs text-[#2D5068] mt-0.5">{getProfitMargin(product.basePrice, product.cogs)}% margin</span>
                                         </div>
                                     </td>

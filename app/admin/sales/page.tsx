@@ -101,12 +101,13 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
     }))
 
     return (
-        <div className="min-h-screen bg-gray-50 text-slate-800 font-sans">
+        <div className="min-h-screen text-slate-800 font-sans">
             <div className="max-w-[1600px] mx-auto p-6 md:p-8 space-y-6">
 
                 {/* ── Header ─────────────────────────────────────────────── */}
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <header className="admin-glass sticky top-0 z-30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 rounded-[1.75rem] shadow-[0_18px_36px_-28px_rgba(15,23,42,0.28)] border border-white/70">
                     <div>
+                        <p className="admin-label mb-2">Order Operations</p>
                         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
                             <PackageSearch className="w-7 h-7 text-orange-600" />
                             Order Command Center
@@ -115,46 +116,47 @@ export default async function SalesDashboardPage({ searchParams }: SalesPageProp
                             Complete order lifecycle — from placement to delivery.
                         </p>
                     </div>
-                    <Link href="/admin/sales/customers">
-                        <button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl transition-colors font-medium text-sm shadow-sm">
-                            <Users className="w-4 h-4" /> CRM / Customers
-                        </button>
+                    <Link
+                        href="/admin/sales/customers"
+                        className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white px-5 py-2.5 rounded-xl transition-all duration-200 font-medium text-sm shadow-sm"
+                    >
+                        <Users className="w-4 h-4" /> CRM / Customers
                     </Link>
                 </header>
 
                 {/* ── Stat Cards ──────────────────────────────────────────── */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div className="admin-surface rounded-[1.6rem] p-5 flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
                             <ShoppingCart className="w-5 h-5 text-orange-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900">{ordersRaw.length}</p>
-                            <p className="text-sm text-slate-500">Matching Orders</p>
+                            <p className="admin-figure text-2xl font-bold text-slate-900 tabular-nums">{ordersRaw.length}</p>
+                            <p className="admin-label mt-1">Matching Orders</p>
                         </div>
                     </div>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div className="admin-surface rounded-[1.6rem] p-5 flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
                             <ClockIcon className="w-5 h-5 text-amber-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-slate-900">{totalActive}</p>
-                            <p className="text-sm text-slate-500">Active Orders</p>
+                            <p className="admin-figure text-2xl font-bold text-slate-900 tabular-nums">{totalActive}</p>
+                            <p className="admin-label mt-1">Active Orders</p>
                         </div>
                     </div>
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div className="admin-surface rounded-[1.6rem] p-5 flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center">
-                            <span className="text-rose-600 font-bold text-lg">₨</span>
+                            <span className="text-rose-600 font-bold text-lg">Rs.</span>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-rose-700">{pendingPayments}</p>
-                            <p className="text-sm text-slate-500">Pending Payments</p>
+                            <p className="admin-figure text-2xl font-bold text-rose-700 tabular-nums">{pendingPayments}</p>
+                            <p className="admin-label mt-1">Pending Payments</p>
                         </div>
                     </div>
                 </div>
 
                 {/* ── Data Grid Card ──────────────────────────────────────── */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="admin-surface rounded-[1.75rem] overflow-hidden">
                     {/* Search & Filters */}
                     <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
                         <Suspense>

@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { CheckCircle2, Package, Truck, MapPin, XCircle, RefreshCcw, Banknote } from "lucide-react"
 import { formatRs } from "@/lib/currency"
 import toast from "react-hot-toast"
 import { OrderStatusValue } from "@/lib/domain"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 type PipelineOrder = {
     id: string
@@ -53,35 +54,46 @@ function ClockIcon(props: any) {
 
 export default function OrderPipeline({ initialOrders, onStatusChange, onOrderClick, onCapturePayment }: OrderPipelineProps) {
     const [orders, setOrders] = useState(initialOrders)
-    const [loadingId, setLoadingId] = useState<string | null>(null)
+    const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
+    const [pendingAction, setPendingAction] = useState<"progress" | "cancel" | "capture" | null>(null)
+    const [isPending, startTransition] = useTransition()
 
-    const handleProgress = async (e: React.MouseEvent, order: PipelineOrder) => {
+    const handleProgress = (e: React.MouseEvent, order: PipelineOrder) => {
         e.stopPropagation()
         const config = STATUS_CONFIG[order.status]
         if (!config.nextStatus) return
+        const nextStatus = config.nextStatus
 
-        setLoadingId(order.id)
-        const success = await onStatusChange(order.id, config.nextStatus)
-        if (success) {
-            setOrders(orders.map(o => o.id === order.id ? { ...o, status: config.nextStatus! } : o))
-            toast.success(`Order advanced to ${STATUS_CONFIG[config.nextStatus].label}`)
-        } else {
-            toast.error("Failed to update status")
-        }
-        setLoadingId(null)
+        setPendingOrderId(order.id)
+        setPendingAction("progress")
+        startTransition(async () => {
+            const success = await onStatusChange(order.id, nextStatus)
+            if (success) {
+                setOrders(currentOrders => currentOrders.map(o => o.id === order.id ? { ...o, status: nextStatus } : o))
+                toast.success(`Order advanced to ${STATUS_CONFIG[nextStatus].label}`)
+            } else {
+                toast.error("Failed to update status")
+            }
+            setPendingOrderId(null)
+            setPendingAction(null)
+        })
     }
 
-    const handleCancel = async (e: React.MouseEvent, orderId: string) => {
+    const handleCancel = (e: React.MouseEvent, orderId: string) => {
         e.stopPropagation()
         if (!confirm("Are you sure you want to cancel this order?")) return
 
-        setLoadingId(orderId)
-        const success = await onStatusChange(orderId, "CANCELED")
-        if (success) {
-            setOrders(orders.map(o => o.id === orderId ? { ...o, status: "CANCELED" } : o))
-            toast.success("Order canceled")
-        }
-        setLoadingId(null)
+        setPendingOrderId(orderId)
+        setPendingAction("cancel")
+        startTransition(async () => {
+            const success = await onStatusChange(orderId, "CANCELED")
+            if (success) {
+                setOrders(currentOrders => currentOrders.map(o => o.id === orderId ? { ...o, status: "CANCELED" } : o))
+                toast.success("Order canceled")
+            }
+            setPendingOrderId(null)
+            setPendingAction(null)
+        })
     }
 
     // Filter out canceled and returned from the active pipeline view (maybe toggle them later)
@@ -103,6 +115,7 @@ export default function OrderPipeline({ initialOrders, onStatusChange, onOrderCl
                         const Icon = config.icon
                         const isCOD = order.paymentMethod === "Cash on Delivery"
                         const needsPayment = isCOD && order.invoice?.status !== "PAID"
+                        const rowPending = isPending && pendingOrderId === order.id
 
                         return (
                             <div
@@ -149,32 +162,38 @@ export default function OrderPipeline({ initialOrders, onStatusChange, onOrderCl
                                 {/* Right: Actions */}
                                 <div className="flex items-center gap-2 md:justify-end w-full md:w-1/3">
                                     {needsPayment && order.status === "DELIVERED" && (
-                                        <button
+                                        <LoadingButton
                                             onClick={(e) => { e.stopPropagation(); onCapturePayment(order.id); }}
+                                            disabled={rowPending}
                                             className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-sm rounded-xl transition-colors flex items-center gap-1.5"
                                         >
                                             <Banknote className="w-4 h-4" /> Capture Payment
-                                        </button>
+                                        </LoadingButton>
                                     )}
 
                                     {config.nextAction && (
-                                        <button
+                                        <LoadingButton
                                             onClick={(e) => handleProgress(e, order)}
-                                            disabled={loadingId === order.id}
-                                            className="px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 font-bold text-sm rounded-xl transition-opacity disabled:opacity-50"
+                                            isLoading={rowPending && pendingAction === "progress"}
+                                            disabled={rowPending}
+                                            loadingText="Updating..."
+                                            className="px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 font-bold text-sm rounded-xl transition-opacity"
                                         >
-                                            {loadingId === order.id ? "Updating..." : config.nextAction}
-                                        </button>
+                                            {config.nextAction}
+                                        </LoadingButton>
                                     )}
 
                                     {order.status !== "CANCELED" && order.status !== "DELIVERED" && (
-                                        <button
+                                        <LoadingButton
                                             onClick={(e) => handleCancel(e, order.id)}
+                                            isLoading={rowPending && pendingAction === "cancel"}
+                                            disabled={rowPending}
+                                            loadingClassName="bg-rose-600 text-white hover:bg-rose-600"
                                             className="px-3 py-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shrink-0"
                                             title="Cancel Order"
                                         >
                                             <XCircle className="w-5 h-5" />
-                                        </button>
+                                        </LoadingButton>
                                     )}
                                 </div>
                             </div>

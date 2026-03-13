@@ -24,10 +24,10 @@ export default function SalesTable({ data }: SalesTableProps) {
 
     return (
         <div className="flex flex-col w-full">
-            <div className="flex justify-end p-4 border-b border-slate-200 bg-slate-50/50">
+            <div className="flex justify-end p-4 border-b border-slate-100 bg-slate-50/50">
                 <button
                     onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 hover:text-orange-600 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-100 rounded-2xl text-sm font-medium text-slate-700 shadow-sm hover:bg-gray-100 hover:text-orange-600 transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                 >
                     <Printer className="w-4 h-4" />
                     Generate Report
@@ -37,7 +37,7 @@ export default function SalesTable({ data }: SalesTableProps) {
             <div className="overflow-x-auto print:overflow-visible">
                 <table className="w-full text-left border-collapse whitespace-nowrap">
                     <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                        <tr className="bg-slate-50 border-b border-slate-100 text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">
                             <th className="px-6 py-3">Date</th>
                             <th className="px-6 py-3">Source</th>
                             <th className="px-6 py-3">Reference ID</th>
@@ -55,8 +55,8 @@ export default function SalesTable({ data }: SalesTableProps) {
                             </tr>
                         ) : (
                             data.map((row) => (
-                                <tr key={row.id} className="hover:bg-orange-50/30 transition-colors group">
-                                    <td className="px-6 py-3 text-sm text-slate-600">
+                                <tr key={row.id} className="hover:bg-white/90 transition-all duration-200 group">
+                                    <td className="px-6 py-3 text-sm text-slate-600 tabular-nums">
                                         {new Date(row.date).toLocaleDateString('en-IN', {
                                             year: 'numeric', month: 'short', day: 'numeric',
                                             hour: '2-digit', minute: '2-digit'
@@ -76,7 +76,7 @@ export default function SalesTable({ data }: SalesTableProps) {
                                     <td className="px-6 py-3 text-sm text-slate-600 capitalize">
                                         {row.paymentMethod.toLowerCase()}
                                     </td>
-                                    <td className="px-6 py-3 text-sm font-bold text-slate-900 text-right">
+                                    <td className="px-6 py-3 text-sm font-bold text-slate-900 text-right tabular-nums">
                                         {formatRs(row.amount)}
                                     </td>
                                 </tr>

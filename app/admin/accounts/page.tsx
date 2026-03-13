@@ -72,19 +72,20 @@ export default async function AccountsDashboardPage() {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between mb-2">
                 <div>
+                    <p className="admin-label mb-2">Ledger Overview</p>
                     <h1 className="text-2xl font-bold text-slate-900">Financial Cockpit</h1>
                     <p className="text-sm text-slate-500 mt-1">Real-time overview of revenue, operations, and cash flow.</p>
                 </div>
                 <div className="flex gap-3">
                     <Link
                         href="/admin/accounts/sales"
-                        className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm flex items-center gap-2"
+                        className="px-4 py-2.5 bg-white border border-slate-100 text-slate-700 text-sm font-medium rounded-2xl hover:bg-gray-100 hover:text-orange-600 transition-all shadow-sm flex items-center gap-2"
                     >
                         Sales Ledger <ArrowRight className="w-4 h-4" />
                     </Link>
                     <Link
                         href="/admin/accounts/expenses"
-                        className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 transition-colors shadow-sm flex items-center gap-2"
+                        className="px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-2xl hover:bg-orange-700 transition-all shadow-[0_14px_28px_-18px_rgba(234,88,12,0.95)] flex items-center gap-2"
                     >
                         Record Expenses <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -98,7 +99,7 @@ export default async function AccountsDashboardPage() {
                     return (
                         <div
                             key={idx}
-                            className={`relative overflow-hidden flex items-center p-5 bg-white border rounded-2xl shadow-sm transition-all hover:shadow-md ${card.isHighlight ? 'border-orange-200 ring-1 ring-orange-100' : 'border-slate-200'}`}
+                            className={`relative overflow-hidden flex items-center p-5 bg-white border rounded-[1.6rem] shadow-sm shadow-slate-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-950/10 ${card.isHighlight ? 'border-orange-200 ring-1 ring-orange-100' : 'border-slate-100'}`}
                         >
                             {card.isHighlight && (
                                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
@@ -108,14 +109,14 @@ export default async function AccountsDashboardPage() {
 
                             <div className="flex flex-col gap-1 z-10 w-full">
                                 <div className="flex justify-between items-center w-full mb-2">
-                                    <p className={`text-sm font-medium ${card.isHighlight ? 'text-orange-800' : 'text-slate-500'}`}>
+                                    <p className={`admin-label ${card.isHighlight ? 'text-orange-800' : 'text-slate-500'}`}>
                                         {card.title}
                                     </p>
                                     <div className={`p-2 rounded-lg ${card.iconBg}`}>
                                         <Icon className={`w-5 h-5 ${card.iconColor}`} />
                                     </div>
                                 </div>
-                                    <p className={`text-3xl font-bold tracking-tight ${card.isHighlight ? 'text-orange-600' : 'text-slate-900'}`}>
+                                    <p className={`admin-figure text-3xl font-bold tracking-tight tabular-nums ${card.isHighlight ? 'text-orange-600' : 'text-slate-900'}`}>
                                     {formatRs(card.value)}
                                 </p>
                             </div>
@@ -125,7 +126,7 @@ export default async function AccountsDashboardPage() {
             </div>
 
             {/* Cash Flow Chart Area */}
-            <div className="bg-white border text-orange-600 border-slate-200 rounded-2xl shadow-sm p-6 mt-2 relative overflow-hidden">
+            <div className="admin-surface rounded-[1.75rem] p-6 mt-2 relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-rose-500"></div>
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-semibold text-slate-900">Cash Flow (Last 30 Days)</h2>

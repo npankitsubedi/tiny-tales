@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { formatRs } from "@/lib/currency"
-import { CreditCard, Banknote, Check, Loader2, X } from "lucide-react"
+import { CreditCard, Banknote, Check, X } from "lucide-react"
 import toast from "react-hot-toast"
+import LoadingButton from "@/components/ui/LoadingButton"
 
 type InvoiceStatus = "PAID" | "UNPAID" | "OVERDUE" | "CANCELLED"
 
@@ -34,23 +35,23 @@ export default function PaymentLedgerCard({
 }: PaymentLedgerCardProps) {
     const [showModal, setShowModal] = useState(false)
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
-    const [isCapturing, setIsCapturing] = useState(false)
+    const [isPending, startTransition] = useTransition()
 
     const isCOD = paymentMethod === "Cash on Delivery"
     const isPaid = invoiceStatus === "PAID"
     const remaining = amountDue - amountPaid
 
-    const handleCapture = async () => {
+    const handleCapture = () => {
         if (!selectedMethod) return
-        setIsCapturing(true)
-        const res = await onCapturePayment(orderId, selectedMethod)
-        if (res.success) {
-            toast.success("Payment captured successfully!")
-            setShowModal(false)
-        } else {
-            toast.error(res.error ?? "Failed to capture payment")
-        }
-        setIsCapturing(false)
+        startTransition(async () => {
+            const res = await onCapturePayment(orderId, selectedMethod)
+            if (res.success) {
+                toast.success("Payment captured successfully!")
+                setShowModal(false)
+            } else {
+                toast.error(res.error ?? "Failed to capture payment")
+            }
+        })
     }
 
     return (
@@ -93,13 +94,13 @@ export default function PaymentLedgerCard({
 
                 {/* COD Receive Button */}
                 {isCOD && !isPaid && (
-                    <button
+                    <LoadingButton
                         onClick={() => setShowModal(true)}
                         className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-sm font-bold rounded-xl transition-all shadow-sm shadow-orange-500/20"
                     >
                         <Banknote className="w-4 h-4" />
                         Receive Payment ({formatRs(remaining)})
-                    </button>
+                    </LoadingButton>
                 )}
             </div>
 
@@ -107,7 +108,11 @@ export default function PaymentLedgerCard({
             {showModal && (
                 <div
                     className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                        if (!isPending) {
+                            setShowModal(false)
+                        }
+                    }}
                 >
                     <div
                         className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
@@ -115,9 +120,13 @@ export default function PaymentLedgerCard({
                     >
                         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
                             <h3 className="font-bold text-slate-800">Receive Payment</h3>
-                            <button onClick={() => setShowModal(false)} className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+                            <LoadingButton
+                                onClick={() => setShowModal(false)}
+                                disabled={isPending}
+                                className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors"
+                            >
                                 <X className="w-5 h-5" />
-                            </button>
+                            </LoadingButton>
                         </div>
 
                         <div className="p-6">
@@ -157,17 +166,15 @@ export default function PaymentLedgerCard({
                                 ))}
                             </div>
 
-                            <button
+                            <LoadingButton
                                 onClick={handleCapture}
-                                disabled={!selectedMethod || isCapturing}
-                                className="w-full py-3 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                                isLoading={isPending}
+                                disabled={!selectedMethod}
+                                loadingText="Marking Paid..."
+                                className="w-full py-3 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white font-bold rounded-xl transition-all"
                             >
-                                {isCapturing ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                    <><Check className="w-4 h-4" /> Confirm & Mark Paid</>
-                                )}
-                            </button>
+                                <Check className="w-4 h-4" /> Confirm & Mark Paid
+                            </LoadingButton>
                         </div>
                     </div>
                 </div>

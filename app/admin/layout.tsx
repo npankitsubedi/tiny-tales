@@ -17,10 +17,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     }
 
     return (
-        <div className="flex min-h-screen bg-slate-50 font-sans">
+        <div data-admin-ui="true" className="flex min-h-screen font-sans text-slate-800">
             <AdminSidebar />
             {/* Main content pane — offset from sidebar via flex layout */}
-            <main className="flex-1 min-w-0 overflow-y-auto pt-0 md:pt-0">
+            <main className="relative flex-1 min-w-0 overflow-y-auto pt-0 md:pt-0">
                 {/* Mobile top spacer so hamburger button doesn't overlap content */}
                 <div className="md:hidden h-16" aria-hidden="true" />
                 {children}

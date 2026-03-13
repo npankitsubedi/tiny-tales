@@ -159,27 +159,28 @@ export default async function DashboardPage() {
     ]
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6 md:p-10 space-y-8">
+        <div className="min-h-screen p-6 md:p-10 space-y-8">
             <div className="max-w-[1400px] mx-auto space-y-8">
                 {/* ── CEO Header & Action Ribbon ── */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="admin-glass sticky top-0 z-30 flex flex-col md:flex-row md:items-end justify-between gap-6 rounded-[2rem] border border-white/70 px-6 py-5 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.3)]">
                     <div>
+                        <p className="admin-label mb-2">Executive Overview</p>
                         <h1 className="text-3xl font-serif text-slate-800 tracking-tight">CEO Cockpit</h1>
                         <p className="text-slate-500 mt-1 text-sm">Enterprise overview of operations and revenue flows.</p>
                     </div>
                     
                     {/* "God Mode" Quick Actions */}
                     <div className="flex flex-wrap items-center gap-3">
-                        <Link href="/admin/pos" className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm">
+                        <Link href="/admin/pos" className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-100 text-slate-700 text-sm font-medium rounded-2xl hover:bg-gray-100 hover:text-orange-600 transition-all duration-200 shadow-sm">
                             <CreditCard className="w-4 h-4" /> POS Sale
                         </Link>
-                        <Link href="/admin/accounts/expenses" className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm">
+                        <Link href="/admin/accounts/expenses" className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-100 text-slate-700 text-sm font-medium rounded-2xl hover:bg-gray-100 hover:text-orange-600 transition-all duration-200 shadow-sm">
                             <Plus className="w-4 h-4" /> Add Expense
                         </Link>
-                        <Link href="/admin/inventory/new" className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:text-orange-600 transition-colors shadow-sm">
+                        <Link href="/admin/inventory/new" className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-100 text-slate-700 text-sm font-medium rounded-2xl hover:bg-gray-100 hover:text-orange-600 transition-all duration-200 shadow-sm">
                             <PackageCheck className="w-4 h-4" /> Add Product
                         </Link>
-                        <Link href="/admin/sales" className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-xl hover:bg-orange-700 transition-colors shadow-sm">
+                        <Link href="/admin/sales" className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white text-sm font-medium rounded-2xl hover:bg-orange-700 transition-all duration-200 shadow-[0_14px_28px_-18px_rgba(234,88,12,0.95)]">
                             Pending Orders <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -188,13 +189,13 @@ export default async function DashboardPage() {
                 {/* ── Top-Level KPI Metric Cards ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {STAT_CARDS.map(({ label, value, icon: Icon, color, border }) => (
-                        <div key={label} className={`relative bg-white rounded-2xl border ${border} p-6 flex items-center gap-5 shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md`}>
+                        <div key={label} className={`relative bg-white rounded-[1.75rem] border ${border} p-6 flex items-center gap-5 shadow-sm shadow-slate-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-950/10`}>
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${color} shrink-0`}>
                                 <Icon className="w-6 h-6" aria-hidden="true" />
                             </div>
                             <div>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{label}</p>
-                                <p className="text-2xl lg:text-3xl font-bold text-slate-800 leading-tight mt-1">{value}</p>
+                                <p className="admin-label">{label}</p>
+                                <p className="admin-figure text-2xl lg:text-3xl font-bold text-slate-800 leading-tight mt-1 tabular-nums">{value}</p>
                             </div>
                         </div>
                     ))}
@@ -204,7 +205,7 @@ export default async function DashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* Left: Revenue Chart (Spans 2/3) */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+                    <div className="lg:col-span-2 admin-surface rounded-[1.75rem] overflow-hidden flex flex-col">
                         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
                             <div>
                                 <h2 className="font-bold text-slate-800 text-lg">Revenue vs Expenses</h2>
@@ -220,7 +221,7 @@ export default async function DashboardPage() {
                     </div>
 
                     {/* Right: The Pulse (Activity Feed) (Spans 1/3) */}
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col max-h-[500px]">
+                    <div className="admin-surface rounded-[1.75rem] overflow-hidden flex flex-col max-h-[500px]">
                         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0 bg-slate-50/50">
                             <div>
                                 <h2 className="font-bold text-slate-800 flex items-center gap-2 text-lg">
