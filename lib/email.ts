@@ -2,9 +2,6 @@ import { Resend } from "resend";
 import { OrderStatus } from "@prisma/client";
 import { formatRs } from "./currency";
 
-// Initialize Resend with the provided API key
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendOrderStatusEmail(
     order: {
         id: string;
@@ -18,6 +15,8 @@ export async function sendOrderStatusEmail(
         console.warn("[EMAIL_SYSTEM] RESEND_API_KEY is missing. Email skipped.");
         return { success: false, error: "Missing API Key" };
     }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
         let subject = "";

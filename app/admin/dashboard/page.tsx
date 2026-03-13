@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                 {/* ── Top-Level KPI Metric Cards ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {STAT_CARDS.map(({ label, value, icon: Icon, color, border }) => (
-                        <div key={label} className={`relative bg-white rounded-[1.75rem] border ${border} p-6 flex items-center gap-5 shadow-sm shadow-slate-950/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-slate-950/10`}>
+                        <div key={label} className={`relative bg-white rounded-[1.75rem] border ${border} p-6 flex items-center gap-5 shadow-sm shadow-slate-950/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-950/10`}>
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${color} shrink-0`}>
                                 <Icon className="w-6 h-6" aria-hidden="true" />
                             </div>

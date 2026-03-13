@@ -3,6 +3,8 @@ import ProductCard from "@/components/storefront/ProductCard"
 import Link from "next/link"
 import { ArrowRight, ShieldCheck, Truck, Heart, Star } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 const CATEGORY_ITEMS = [
     { label: "Newborn", slug: "NEWBORN", emoji: "👶", color: "from-rose-100 to-rose-200", textColor: "text-rose-700" },
     { label: "Boys", slug: "BOYS", emoji: "🧒", color: "from-sky-100 to-sky-200", textColor: "text-sky-700" },
