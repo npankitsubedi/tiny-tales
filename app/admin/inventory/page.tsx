@@ -47,11 +47,23 @@ async function getInventoryData() {
 
     const lowStockVariants = allVariants.filter(v => v.stockCount <= v.lowStockThreshold)
 
-    // Convert Prisma Decimal back to primitive numbers for client-side rendering props
+    // Explicitly serialize only the fields the Client Component needs.
+    // Never use ...spread on a Prisma object — it carries Date and Decimal
+    // fields that cannot cross the Server → Client boundary.
     const sanitizedProducts = products.map(p => ({
-        ...p,
+        id: p.id,
+        title: p.title,
+        category: p.category as string,
+        basePrice: p.basePrice.toNumber(),
         cogs: p.cogs.toNumber(),
-        basePrice: p.basePrice.toNumber()
+        variants: p.variants.map(v => ({
+            id: v.id,
+            sku: v.sku,
+            size: v.size,
+            color: v.color,
+            stockCount: v.stockCount,
+            lowStockThreshold: v.lowStockThreshold,
+        })),
     }))
 
     return { products: sanitizedProducts, lowStockVariants }
