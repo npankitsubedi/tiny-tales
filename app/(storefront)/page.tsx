@@ -3,6 +3,8 @@ import ProductCard from "@/components/storefront/ProductCard"
 import Link from "next/link"
 import { ArrowRight, ShieldCheck, Truck, Heart, Star } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 const CATEGORY_ITEMS = [
     { label: "Newborn", slug: "NEWBORN", emoji: "👶", color: "from-rose-100 to-rose-200", textColor: "text-rose-700" },
     { label: "Boys", slug: "BOYS", emoji: "🧒", color: "from-sky-100 to-sky-200", textColor: "text-sky-700" },
@@ -45,7 +47,7 @@ export default async function StorefrontHomePage() {
         <div className="overflow-x-hidden">
 
             {/* ─── Hero Section ─── */}
-            <section className="relative bg-gradient-to-tr from-slate-50 via-secondary/10 to-white min-h-[85vh] flex items-center overflow-hidden">
+            <section className="relative bg-gray-50 min-h-[85vh] flex items-center overflow-hidden">
                 {/* Decorative mesh gradients */}
                 <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-bl from-secondary/30 via-transparent to-transparent rounded-full blur-3xl pointer-events-none translate-x-1/3 -translate-y-1/3 opacity-80" />
                 <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-rose-100/40 via-transparent to-transparent rounded-full blur-3xl pointer-events-none -translate-x-1/3 translate-y-1/3 opacity-70" />
@@ -67,12 +69,12 @@ export default async function StorefrontHomePage() {
                         </p>
                         <div className="flex gap-4 justify-center md:justify-start flex-wrap">
                             <Link href="/shop?category=NEWBORN">
-                                <button className="inline-flex items-center gap-2 bg-primary hover:opacity-90 text-primary-foreground font-semibold px-8 py-4 rounded-full transition-all shadow-lg hover:-translate-y-0.5 text-base">
+                                <button className="inline-flex items-center gap-2 bg-orange-600 text-white hover:bg-orange-700 font-semibold px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:-translate-y-1 hover:shadow-xl active:scale-95 text-base">
                                     Shop Newborn Essentials <ArrowRight className="w-4 h-4" />
                                 </button>
                             </Link>
                             <Link href="/shop">
-                                <button className="inline-flex items-center gap-2 bg-white text-slate-700 font-semibold px-8 py-4 rounded-full transition-all shadow-sm hover:shadow-md text-base border border-slate-100">
+                                <button className="inline-flex items-center gap-2 bg-white text-slate-700 font-semibold px-8 py-4 rounded-full transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 text-base border border-slate-100 active:scale-95">
                                     View All Collections
                                 </button>
                             </Link>
@@ -108,7 +110,7 @@ export default async function StorefrontHomePage() {
             </section>
 
             {/* ─── Best Sellers ─── */}
-            <section className="py-20 bg-white">
+            <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-end justify-between mb-10">
                         <div>
