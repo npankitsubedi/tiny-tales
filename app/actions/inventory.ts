@@ -227,3 +227,22 @@ export async function updateStock(variantId: string, newCount: number) {
         return actionError(error, "Failed to update stock")
     }
 }
+
+export async function deleteProductVariant(variantId: string) {
+    try {
+        await requireSuperadmin()
+        
+        await db.productVariant.delete({
+            where: { id: variantId }
+        })
+        
+        revalidatePath("/admin/inventory")
+        revalidatePath("/")
+        revalidatePath("/shop")
+        
+        return actionSuccess({ deleted: true })
+    } catch (error) {
+        console.error("[INVENTORY_ERROR] Failed to delete variant:", error)
+        return actionError(error, "Failed to delete variant")
+    }
+}

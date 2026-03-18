@@ -58,7 +58,7 @@ export default async function StorefrontHomePage() {
                         </span>
                         <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-slate-800 leading-tight mb-6">
                             Dress your little one{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4F9]0 to-[#F5F5F5]0">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4F9] to-[#F5F5F5]">
                                 with love.
                             </span>
                         </h1>

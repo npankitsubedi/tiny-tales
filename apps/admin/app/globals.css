@@ -1,0 +1,328 @@
+@import "tailwindcss";
+
+/* ─── Tailwind v4 Theme Tokens ─── */
+@theme inline {
+    /* ── Emotional Design Palette ── */
+    --color-bg-primary: #FAFAF8; /* Oatmeal / Milk */
+    --color-bg-card: #FFFFFF;
+    --color-primary: #F28C6E; /* Warm Peach / Terracotta */
+    --color-primary-foreground: #FFFFFF;
+    --color-accent: #A7BFA0; /* Soft Sage Green */
+    --color-accent-foreground: #FAFAF8;
+    
+    /* Typography */
+    --color-text-primary: #4A4A4A; /* Soft Slate */
+    --color-text-secondary: #71717A;
+    --color-text-muted: #A1A1AA;
+
+    /* ── Legacy Aliases mapped to new warm palette ── */
+    --color-brand-primary: #F28C6E;
+    --color-brand-primary-dk: #E07B5D;
+    --color-brand-soft: #FAFAF8;
+    --color-brand-bg: #FAFAF8;
+    --color-brand-surface: #FFFFFF;
+    --color-brand-border: #F3F4F6;
+    
+    --color-brand-cream: #FFFFFF;
+    --color-brand-warm: #FAFAF8;
+    --color-brand-amber: #F28C6E;
+    --color-brand-rose: #F28C6E;
+    --color-brand-blush: #FAFAF8;
+    --color-brand-teal: #A7BFA0;
+    --color-brand-mint: #A7BFA0;
+
+    /* Fonts (Injected via Next.js 15 next/font) */
+    --font-sans: var(--font-brand-sans), "Nunito", "Quicksand", system-ui, sans-serif;
+    --font-serif: var(--font-brand-sans), "Playfair Display", Georgia, serif;
+
+    /* ── NO SHARP EDGES ── */
+    --radius-sm: 1rem;
+    --radius-md: 1.5rem;
+    --radius-lg: 2rem;
+    --radius-xl: 3rem;
+    --radius-card: 1.5rem;
+    --radius-pill: 9999px;
+
+    /* ── Soft Shadows (Floating feel) ── */
+    --shadow-sm: 0 4px 20px rgba(0,0,0,0.03);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.05);
+    --shadow-card: 0 8px 30px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 20px 40px rgba(242, 140, 110, 0.08);
+
+    /* ── Organic Motion ── */
+    --animate-float: float 6s ease-in-out infinite;
+    --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    --animate-pulse-soft: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ─── Base Styles ─── */
+:root {
+    --background: #FAFAF8;
+    --foreground: #4A4A4A;
+    --primary: #F28C6E;
+    --primary-foreground: #FFFFFF;
+    --secondary: #A7BFA0;
+    --secondary-foreground: #FAFAF8;
+    --muted: #F3F4F6;
+    --border: #F3F4F6;
+    --ring: rgba(242, 140, 110, 0.4);
+    
+    /* Map Tailwind classes to radii */
+    --radius: 1.5rem;
+    
+    --admin-canvas: #FAFAF8;
+    --admin-surface: rgba(255, 255, 255, 0.9);
+    --admin-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    --admin-shadow-lg: 0 12px 40px rgba(0,0,0,0.05);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography Utilities ─── */
+h1,
+h2,
+h3,
+h4,
+.font-serif {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+}
+
+/* ─── Focus Styles (a11y) ─── */
+:focus-visible {
+    outline: 2px solid #F28C6E;
+    outline-offset: 3px;
+    border-radius: 9999px; /* No sharp edges for focus rings either */
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #E4E4E7;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #F28C6E;
+}
+
+/* ─── Custom Animations ─── */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; background-color: rgba(242, 140, 110, 0.05); }
+    50% { opacity: 0.6; background-color: rgba(242, 140, 110, 0.15); }
+}
+
+/* ─── Minimum touch target for a11y ─── */
+button,
+a,
+[role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+[data-admin-ui] button,
+[data-admin-ui] a,
+[data-admin-ui] [role="button"] {
+    transition-property: all;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+}
+
+[data-admin-ui] {
+    background:
+        radial-gradient(circle at top left, rgba(242, 140, 110, 0.06), transparent 22rem),
+        radial-gradient(circle at top right, rgba(167, 191, 160, 0.06), transparent 20rem),
+        var(--admin-canvas);
+}
+
+[data-admin-ui] main {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6)),
+        transparent;
+}
+
+[data-admin-ui] button:active,
+[data-admin-ui] a:active,
+[data-admin-ui] [role="button"]:active {
+    transform: scale(0.98);
+}
+
+[data-admin-ui] button.bg-orange-600:hover,
+[data-admin-ui] a.bg-orange-600:hover {
+    background-color: var(--color-brand-primary-dk);
+}
+
+[data-admin-ui] button.bg-white:hover,
+[data-admin-ui] a.bg-white:hover,
+[data-admin-ui] button.bg-gray-50:hover,
+[data-admin-ui] a.bg-gray-50:hover {
+    background-color: #FAFAF8;
+}
+
+[data-admin-ui] input,
+[data-admin-ui] select,
+[data-admin-ui] textarea {
+    transition: border-color 400ms ease, box-shadow 400ms ease, background-color 400ms ease;
+    border-radius: 1rem; /* Softer inputs */
+}
+
+[data-admin-ui] input:focus,
+[data-admin-ui] select:focus,
+[data-admin-ui] textarea:focus {
+    outline: none;
+    border-color: #F28C6E;
+    box-shadow: 0 0 0 4px rgba(242, 140, 110, 0.14);
+}
+
+[data-admin-ui] tr {
+    transition: all 200ms ease-in-out;
+}
+
+[data-admin-ui] .admin-glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-admin-ui] .admin-surface {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(226, 232, 240, 0.7);
+    box-shadow: var(--admin-shadow);
+}
+
+[data-admin-ui] .admin-surface-strong {
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--admin-shadow-lg);
+}
+
+[data-admin-ui] .admin-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 600;
+    color: #64748b;
+}
+
+[data-admin-ui] .admin-figure {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+}
+
+/* Override for purely decorative/inline elements */
+.touch-auto {
+    min-height: unset;
+    min-width: unset;
+}
+
+/* ─── Brand Button Utility ─── */
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    transition: background-color 0.4s ease-out, box-shadow 0.4s ease-out, transform 0.4s ease-out;
+    border-radius: 9999px;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-brand-primary-dk);
+    box-shadow: 0 8px 20px rgba(242, 140, 110, 0.15);
+    transform: translateY(-2px);
+}
+
+/* ─── Skeleton Shimmer Animation ─── */
+@keyframes skeleton-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 0.5rem;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ─── Drawer Animation ─── */
+@keyframes slide-in-right {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ─── Always light (no dark mode override) ─── */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #FFFFFF;
+        --foreground: #1E293B;
+    }
+}

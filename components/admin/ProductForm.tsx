@@ -5,7 +5,7 @@ import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Plus, Trash2, Image as ImageIcon, X, Ruler } from "lucide-react"
-import { createProduct, createProductVariant, updateProduct, updateProductVariant } from "@/app/actions/inventory"
+import { createProduct, createProductVariant, updateProduct, updateProductVariant, deleteProductVariant } from "@/app/actions/inventory"
 import toast from "react-hot-toast"
 import { CldUploadWidget } from "next-cloudinary"
 import { useRouter } from "next/navigation"
@@ -128,8 +128,20 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 productId = productResult.data.id
             }
 
-            // 3. Update or Create Variants
+            // 3. Update, Create, or Delete Variants
             let variantErrors = 0
+            
+            // Handle deletions first
+            if (isEditMode && initialData?.variants) {
+                const currentVariantSkus = new Set(data.variants.map(v => v.sku))
+                for (const oldVariant of initialData.variants) {
+                    if (!currentVariantSkus.has(oldVariant.sku)) {
+                        const delResult = await deleteProductVariant(oldVariant.id)
+                        if (!delResult.success) variantErrors++
+                    }
+                }
+            }
+
             for (const variant of data.variants) {
                 const existingVariant = isEditMode ? initialData?.variants.find((iv: any) => iv.sku === variant.sku) : null
 

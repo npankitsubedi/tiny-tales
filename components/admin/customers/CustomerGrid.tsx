@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatRsCompact } from '@/lib/currency';
 
 export type CustomerRow = {
@@ -20,6 +21,7 @@ interface CustomerGridProps {
 }
 
 export default function CustomerGrid({ customers }: CustomerGridProps) {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
 
     const filtered = customers.filter(c => {
@@ -71,11 +73,8 @@ export default function CustomerGrid({ customers }: CustomerGridProps) {
                             </tr>
                         ) : (
                             filtered.map((customer) => (
-                                <tr key={customer.id} className="hover:bg-white/90 hover:shadow-sm transition-all duration-200 group cursor-pointer relative">
+                                <tr key={customer.id} onClick={() => router.push(`/admin/customers/${customer.id}`)} className="hover:bg-white/90 hover:shadow-sm transition-all duration-200 group cursor-pointer">
                                     <td className="px-6 py-4 min-w-[200px]">
-                                        <Link href={`/admin/customers/${customer.id}`} className="absolute inset-0 z-10">
-                                            <span className="sr-only">View {customer.name}</span>
-                                        </Link>
                                         <div className="font-bold text-slate-800">
                                             {customer.name || 'Anonymous User'}
                                         </div>

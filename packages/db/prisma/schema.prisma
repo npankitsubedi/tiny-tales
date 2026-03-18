@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  SUPERADMIN
+}
+
+model User {
+  id                     String          @id @default(cuid())
+  name                   String?
+  phone                  String?
+  babyBirthMonth         String?
+  defaultShippingAddress String?
+  email                  String          @unique
+  passwordHash           String
+  role                   Role            @default(CUSTOMER)
+  orders                 Order[]
+  abandonedCart          AbandonedCart[]
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+}
+
+enum ProductCategory {
+  NEWBORN
+  BOYS
+  GIRLS
+  MATERNITY
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  title           String
+  description     String?
+  category        ProductCategory
+  cogs            Decimal          @db.Decimal(10, 2)
+  basePrice       Decimal          @db.Decimal(10, 2)
+  isNonReturnable Boolean          @default(false)
+  images          String[] // Up to 10 Cloudinary URLs (photos & videos)
+  sizeChart       Json? // [{label, chest, waist, length, ageRange}]
+  babyAgeRange    String? // e.g. "0-6 months", "6-12 months"
+  variants        ProductVariant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id                String      @id @default(cuid())
+  productId         String
+  product           Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size              String
+  color             String
+  sku               String      @unique
+  stockCount        Int         @default(0)
+  lowStockThreshold Int         @default(5)
+  orderItems        OrderItem[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELED
+  RETURNED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName    String?
+  contactPhone    String?
+  shippingAddress String?
+  deliveryCity    String? // Kathmandu, Lalitpur, Bhaktapur, Outside Valley
+  babyAgeMonths   Int? // Baby's age in months at time of order
+  isInternational Boolean     @default(false)
+  status          OrderStatus @default(PENDING)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  taxAmount       Decimal     @db.Decimal(10, 2)
+  paymentMethod   String
+  adminNotes      String? // Internal notes by admin staff
+  orderItems      OrderItem[]
+  invoice         Invoice?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id              String         @id @default(cuid())
+  orderId         String
+  order           Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId       String
+  variant         ProductVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  quantity        Int            @default(1)
+  priceAtPurchase Decimal        @db.Decimal(10, 2)
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountDue     Decimal       @db.Decimal(10, 2)
+  amountPaid    Decimal       @default(0) @db.Decimal(10, 2)
+  taxAmount     Decimal       @db.Decimal(10, 2)
+  status        InvoiceStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model AbandonedCart {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cartData  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- ACCOUNTING MODULE ---
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  CASH
+  FONEPAY
+  CARD
+  BANK
+}
+
+model Vendor {
+  id             String          @id @default(cuid())
+  name           String
+  contact        String?
+  address        String?
+  purchaseOrders PurchaseOrder[]
+  expenses       Expense[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum POStatus {
+  PAID
+  UNPAID
+}
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  vendorId    String
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  totalAmount Decimal  @db.Decimal(10, 2)
+  status      POStatus @default(UNPAID)
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Expense {
+  id            String         @id @default(cuid())
+  category      String // Rent, Salary, Marketing, Packaging, etc.
+  amount        Decimal        @db.Decimal(10, 2)
+  date          DateTime       @default(now())
+  paymentMethod PaymentMethod?
+  vendorId      String?
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  type          TransactionType
+  category      String // Web Sale, POS Sale, Restock, Rent, etc.
+  amount        Decimal         @db.Decimal(10, 2)
+  paymentMethod PaymentMethod?
+  referenceId   String? // Link to Order ID or Purchase ID
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// --- OPERATIONAL SETTINGS MODULE ---
+
+model StoreSettings {
+  id                    String  @id @default("default") // Only one row allowed
+  storeName             String  @default("Tiny Tales")
+  physicalAddress       String?
+  supportEmail          String?
+  supportPhone          String?
+  defaultTaxRate        Decimal @default(13.00) @db.Decimal(5, 2)
+  flatShippingFee       Decimal @default(100.00) @db.Decimal(10, 2)
+  freeShippingThreshold Decimal @default(5000.00) @db.Decimal(10, 2)
+  updatedAt             DateTime @updatedAt
+}
