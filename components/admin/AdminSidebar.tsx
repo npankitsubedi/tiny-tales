@@ -21,7 +21,7 @@ const NAV_ITEMS = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/inventory", label: "Inventory", icon: Package },
     { href: "/admin/sales", label: "Orders", icon: ShoppingCart },
-    { href: "/admin/sales/customers", label: "Customers", icon: Users },
+    { href: "/admin/customers", label: "Customers", icon: Users },
     { href: "/admin/accounts", label: "Accounts", icon: Receipt },
     { href: "/admin/settings", label: "Settings", icon: Settings },
 ]

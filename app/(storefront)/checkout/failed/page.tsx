@@ -1,6 +1,8 @@
 import Link from "next/link"
 import { XCircle, ShoppingBag, RefreshCw } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 const REASON_MESSAGES: Record<string, string> = {
     esewa_verification_failed: "eSewa could not verify your payment signature.",
     khalti_lookup_failed: "Khalti could not confirm your payment.",

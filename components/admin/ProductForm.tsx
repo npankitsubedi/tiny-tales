@@ -244,42 +244,54 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 </div>
 
                 <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
-                    <CldUploadWidget
-                        signatureEndpoint="/api/sign-cloudinary-params"
-                        options={{
-                            maxFiles: 10 - mediaItems.length,
-                            maxFileSize: 50000000,
-                            resourceType: "auto",
-                            clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "mp4", "mov"],
-                            sources: ["local", "url", "camera", "google_drive"],
-                            theme: "minimal",
-                        }}
-                        onSuccess={(result: any) => {
-                            if (result.event === "success") {
-                                setMediaItems(prev => [...prev, {
-                                    url: result.info.secure_url,
-                                    type: result.info.resource_type === "video" ? "video" : "image"
-                                }])
-                            }
-                        }}
-                        onError={(error: any) => {
-                            console.error("[CLOUDINARY_ERROR] Upload failed:", error)
-                            toast.error("Upload failed. File might be too large (Max 50MB).")
-                        }}
-                    >
-                        {({ open, isLoading }) => (
-                            <button
-                                type="button"
-                                onClick={() => open()}
-                                disabled={isLoading || mediaItems.length >= 10 || isSubmitting}
-                                className="w-full border-2 border-dashed border-slate-300 hover:border-[#A8BDD0] hover:bg-[#EEF4F9] disabled:bg-slate-100 disabled:border-slate-200 disabled:cursor-not-allowed rounded-2xl p-8 text-center transition-all group"
-                            >
-                                <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${mediaItems.length >= 10 ? 'text-slate-300' : 'text-amber-500 group-hover:text-[#2D5068]'}`} aria-hidden="true" />
-                                <p className="text-sm font-semibold text-slate-700">Click to upload media</p>
-                                <p className="text-xs text-slate-400 mt-1">Upload up to {10 - mediaItems.length} more files (Images or Video)</p>
-                            </button>
-                        )}
-                    </CldUploadWidget>
+                    {process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ? (
+                        <CldUploadWidget
+                            signatureEndpoint="/api/sign-cloudinary-params"
+                            options={{
+                                maxFiles: 10 - mediaItems.length,
+                                maxFileSize: 50000000,
+                                resourceType: "auto",
+                                clientAllowedFormats: ["png", "jpeg", "jpg", "webp", "mp4", "mov"],
+                                sources: ["local", "url", "camera", "google_drive"],
+                                theme: "minimal",
+                            }}
+                            onSuccess={(result: any) => {
+                                if (result.event === "success") {
+                                    setMediaItems(prev => [...prev, {
+                                        url: result.info.secure_url,
+                                        type: result.info.resource_type === "video" ? "video" : "image"
+                                    }])
+                                }
+                            }}
+                            onError={(error: any) => {
+                                console.error("[CLOUDINARY_ERROR] Upload failed:", error)
+                                toast.error("Upload failed. File might be too large (Max 50MB).")
+                            }}
+                        >
+                            {({ open, isLoading }) => (
+                                <button
+                                    type="button"
+                                    onClick={() => open()}
+                                    disabled={isLoading || mediaItems.length >= 10 || isSubmitting}
+                                    className="w-full border-2 border-dashed border-slate-300 hover:border-[#A8BDD0] hover:bg-[#EEF4F9] disabled:bg-slate-100 disabled:border-slate-200 disabled:cursor-not-allowed rounded-2xl p-8 text-center transition-all group"
+                                >
+                                    <ImageIcon className={`w-8 h-8 mx-auto mb-2 ${mediaItems.length >= 10 ? 'text-slate-300' : 'text-amber-500 group-hover:text-[#2D5068]'}`} aria-hidden="true" />
+                                    <p className="text-sm font-semibold text-slate-700">Click to upload media</p>
+                                    <p className="text-xs text-slate-400 mt-1">Upload up to {10 - mediaItems.length} more files (Images or Video)</p>
+                                </button>
+                            )}
+                        </CldUploadWidget>
+                    ) : (
+                        <button
+                            type="button"
+                            disabled
+                            className="w-full border-2 border-dashed border-slate-200 bg-slate-100 cursor-not-allowed rounded-2xl p-8 text-center"
+                        >
+                            <ImageIcon className="w-8 h-8 mx-auto mb-2 text-slate-300" aria-hidden="true" />
+                            <p className="text-sm font-semibold text-slate-400">Uploads Disabled (Missing API Keys)</p>
+                            <p className="text-xs text-slate-400 mt-1">Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME to enable uploads</p>
+                        </button>
+                    )}
                 </div>
 
                 {/* Preview Grid */}
