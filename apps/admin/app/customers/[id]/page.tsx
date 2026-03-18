@@ -2,8 +2,7 @@ import { db } from "@tinytales/db"
 import { notFound, redirect } from "next/navigation"
 import { ArrowLeft, MessageCircle, ShoppingBag, FileText, User } from "lucide-react"
 import Link from "next/link"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import EditCustomerModal from '@/features/crm/components/EditCustomerModal'
 import { formatRsCompact } from "@/lib/currency"
 
@@ -23,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+    const { userId, sessionClaims } = await auth()
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (!userId || role !== "SUPERADMIN") redirect("/")
 
     // CRITICAL Next.js 15: Always await params before accessing properties
     const { id } = await params

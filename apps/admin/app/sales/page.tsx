@@ -1,6 +1,5 @@
 import { db } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { updateOrderStatus, capturePayment } from '@/features/sales/actions/sales'
 import { OrderStatus, InvoiceStatus } from "@tinytales/db"
@@ -16,9 +15,10 @@ export const metadata = {
 }
 
 async function verifySalesAccess() {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.role) redirect("/login")
-    if (session.user.role !== "SUPERADMIN") redirect("/unauthorized")
+    const { userId, sessionClaims } = await auth()
+    if (!userId) redirect("/login")
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (role !== "SUPERADMIN") redirect("/unauthorized")
 }
 
 // ── Inline Server Actions ──────────────────────────────────────────────────

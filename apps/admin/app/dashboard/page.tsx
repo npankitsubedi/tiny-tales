@@ -12,8 +12,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { formatRs } from "@/lib/currency"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import DashboardChart from '@/features/dashboard/components/DashboardChart'
 import ActivityFeed, { ActivityItem } from '@/features/dashboard/components/ActivityFeed'
@@ -42,8 +41,9 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default async function DashboardPage() {
-    const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+    const { userId, sessionClaims } = await auth()
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (!userId || role !== "SUPERADMIN") redirect("/")
 
     const { start, end } = getDateRange()
 

@@ -3,6 +3,8 @@ import StorefrontProviders from "@/features/layout/components/StorefrontProvider
 import Link from "next/link"
 import { Heart } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 export const metadata = {
     title: {
         default: "Tiny Tales | Baby & Maternity Essentials",

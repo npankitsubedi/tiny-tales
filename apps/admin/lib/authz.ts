@@ -1,19 +1,19 @@
 import { Role } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 
 export async function requireRole(allowedRoles: Role[]) {
-    const session = await getServerSession(authOptions)
+    const { userId, sessionClaims } = await auth()
 
-    if (!session?.user?.role) {
+    if (!userId) {
         throw new Error("Unauthorized: No active session found")
     }
 
-    if (!allowedRoles.includes(session.user.role as Role)) {
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (!role || !allowedRoles.includes(role as Role)) {
         throw new Error("Forbidden: Insufficient privileges")
     }
 
-    return session.user
+    return { id: userId, role }
 }
 
 export async function requireSuperadmin() {

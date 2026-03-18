@@ -2,8 +2,7 @@ import { getDashboardKPIs, getCashFlowData } from '@/features/accounts/actions/a
 import { ShoppingCart, TrendingDown, TrendingUp, PiggyBank, ArrowRight } from 'lucide-react';
 import CashFlowChart from '@/features/accounts/components/CashFlowChart';
 import Link from 'next/link';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { formatRs } from '@/lib/currency';
 
@@ -14,14 +13,10 @@ export const metadata = {
 }
 
 async function verifyAccountsAccess() {
-    const session = await getServerSession(authOptions)
-    if (!session || !session.user || !("role" in session.user)) {
-        redirect("/login")
-    }
-    const role = session.user.role as string
-    if (role !== "SUPERADMIN") {
-        redirect("/unauthorized")
-    }
+    const { userId, sessionClaims } = await auth()
+    if (!userId) redirect("/login")
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (role !== "SUPERADMIN") redirect("/unauthorized")
 }
 
 export default async function AccountsDashboardPage() {

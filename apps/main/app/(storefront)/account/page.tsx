@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { db } from "@tinytales/db"
 import { format } from "date-fns"
 import { User, Package, FileText, LogOut } from "lucide-react"
 import Link from "next/link"
 import { formatRs } from "@/lib/currency"
+import { SignOutButton } from "@clerk/nextjs"
 
 const STATUS_COLORS: Record<string, string> = {
     PENDING: "bg-[#D9E9F2] text-[#2D5068]",
@@ -19,19 +19,19 @@ const STATUS_COLORS: Record<string, string> = {
 export const metadata = { title: "My Account" }
 
 export default async function AccountPage() {
-    const session = await getServerSession(authOptions)
+    const { userId } = await auth()
 
-    if (!session?.user?.id) {
+    if (!userId) {
         redirect("/login")
     }
 
     const [user, ordersRaw] = await Promise.all([
         db.user.findUnique({
-            where: { id: session.user.id },
+            where: { id: userId },
             select: { id: true, name: true, email: true, role: true, createdAt: true }
         }),
         db.order.findMany({
-            where: { userId: session.user.id },
+            where: { userId },
             orderBy: { createdAt: "desc" },
             include: { invoice: { select: { invoiceNumber: true } } }
         })
@@ -61,9 +61,11 @@ export default async function AccountPage() {
                             Member since {format(new Date(user.createdAt), "MMMM yyyy")}
                         </p>
                     </div>
-                    <Link href="/api/auth/signout" className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 transition-colors px-4 py-2 rounded-xl hover:bg-red-50">
-                        <LogOut className="w-4 h-4" /> Sign Out
-                    </Link>
+                    <SignOutButton redirectUrl="/">
+                        <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 transition-colors px-4 py-2 rounded-xl hover:bg-red-50">
+                            <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                    </SignOutButton>
                 </div>
 
                 {/* Order History */}

@@ -1,6 +1,5 @@
 import { db } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Settings, ShieldCheck } from "lucide-react"
 
@@ -13,8 +12,9 @@ export const metadata = {
 }
 
 export default async function SettingsPage() {
-    const session = await getServerSession(authOptions)
-    if (session?.user?.role !== "SUPERADMIN") redirect("/")
+    const { userId, sessionClaims } = await auth()
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (!userId || role !== "SUPERADMIN") redirect("/")
 
     // Execute concurrent fetches for Settings Row and Admin Users
     const [settingsRow, superAdmins] = await Promise.all([

@@ -1,6 +1,5 @@
 import { db } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { Users, ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -13,14 +12,10 @@ export const metadata = {
 }
 
 async function verifySalesAccess() {
-    const session = await getServerSession(authOptions)
-    if (!session || !session.user || !("role" in session.user)) {
-        redirect("/login")
-    }
-    const allowed = ["SUPERADMIN"]
-    if (!allowed.includes(session.user.role as string)) {
-        redirect("/unauthorized")
-    }
+    const { userId, sessionClaims } = await auth()
+    if (!userId) redirect("/login")
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (role !== "SUPERADMIN") redirect("/unauthorized")
 }
 
 export default async function CustomerCrmPage() {

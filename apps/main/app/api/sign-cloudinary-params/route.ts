@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from "cloudinary"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 
 cloudinary.config({
     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -11,11 +10,11 @@ cloudinary.config({
 export async function POST(request: Request) {
     try {
         // Enforce SUPERADMIN / INVENTORY_ADMIN authorization mapping to prevent abuse of our API keys
-        const session = await getServerSession(authOptions)
-        if (!session || !session.user || !("role" in session.user)) {
+        const { userId, sessionClaims } = await auth()
+        if (!userId) {
             return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 })
         }
-        const role = session.user.role as string
+        const role = (sessionClaims?.metadata as { role?: string })?.role
         // Enforce pure SUPERADMIN authorization mapping
         if (role !== "SUPERADMIN") {
             return new Response(JSON.stringify({ error: "Forbidden: Restricted to Admins" }), { status: 403 })

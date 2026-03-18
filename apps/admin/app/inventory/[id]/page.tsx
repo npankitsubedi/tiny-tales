@@ -1,6 +1,5 @@
 import { db } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect, notFound } from "next/navigation"
 import ProductForm from '@/features/inventory/components/ProductForm'
 
@@ -9,13 +8,10 @@ export const metadata = {
 }
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions)
-    if (!session || !session.user) {
-        redirect("/login")
-    }
-    if ((session.user as { role?: string }).role !== "SUPERADMIN") {
-        redirect("/")
-    }
+    const { userId, sessionClaims } = await auth()
+    if (!userId) redirect("/login")
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (role !== "SUPERADMIN") redirect("/")
 
     const { id } = await params
     const product = await db.product.findUnique({

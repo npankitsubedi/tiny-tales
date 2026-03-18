@@ -1,7 +1,6 @@
 import { db } from "@tinytales/db"
 import { notFound, redirect } from "next/navigation"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { OrderStatus } from "@tinytales/db"
 import { updateOrderStatus, capturePayment, saveOrderNote } from '@/features/sales/actions/sales'
 import OrderDetailLayout from '@/features/sales/components/OrderDetailLayout'
@@ -19,8 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user as { role?: string }).role !== "SUPERADMIN") redirect("/")
+    const { userId, sessionClaims } = await auth()
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (!userId || role !== "SUPERADMIN") redirect("/")
 
     const { id } = await params
 

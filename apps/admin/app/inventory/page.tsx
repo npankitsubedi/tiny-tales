@@ -1,6 +1,5 @@
 import { db } from "@tinytales/db"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import InventoryTable from '@/features/inventory/components/InventoryTable'
 import LowStockSidebar from '@/features/inventory/components/LowStockSidebar'
@@ -8,16 +7,10 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 
 async function getInventoryData() {
-    const session = await getServerSession(authOptions)
-
-    if (!session || !session.user || !("role" in session.user)) {
-        redirect("/login")
-    }
-
-    const role = session.user.role as string
-    if (role !== "SUPERADMIN") {
-        redirect("/unauthorized")
-    }
+    const { userId, sessionClaims } = await auth()
+    if (!userId) redirect("/login")
+    const role = (sessionClaims?.metadata as { role?: string })?.role
+    if (role !== "SUPERADMIN") redirect("/unauthorized")
 
     // Fetch all products with their variants
     const products = await db.product.findMany({

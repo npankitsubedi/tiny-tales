@@ -1,7 +1,7 @@
 "use client"
 
 import { useCart } from "@/features/cart/store/cartStore"
-import { useSession, signOut } from "next-auth/react"
+import { useUser, useClerk } from "@clerk/nextjs"
 import CartDrawer from "@/features/cart/components/CartDrawer"
 import { ShoppingBag, Menu, X, Heart, User, LayoutDashboard, LogIn } from "lucide-react"
 import Link from "next/link"
@@ -18,13 +18,14 @@ const NAV_LINKS = [
 
 export default function StorefrontHeader() {
   const { cartCount } = useCart()
-  const { data: session, status } = useSession()
+  const { user, isLoaded, isSignedIn } = useUser()
+  const { signOut } = useClerk()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  const isAdmin = status === "authenticated" && session?.user?.role === "SUPERADMIN"
-  const isLoggedIn = status === "authenticated"
+  const isAdmin = isSignedIn && (user?.publicMetadata?.role as string) === "SUPERADMIN"
+  const isLoggedIn = isSignedIn
 
   // Add shadow when page is scrolled
   useEffect(() => {
@@ -85,13 +86,13 @@ export default function StorefrontHeader() {
             )}
 
             {/* Auth state */}
-            {status !== "loading" && (
+            {isLoaded && (
               isLoggedIn ? (
                 <Link href="/account"
                   className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-[#2D5068] hover:bg-[#EEF4F9] rounded-full transition-all"
                   aria-label="My account">
                   <User className="w-4 h-4" aria-hidden="true" />
-                  {session.user?.name?.split(" ")[0] || "Account"}
+                  {user?.firstName || "Account"}
                 </Link>
               ) : (
                 <Link href="/login"
@@ -170,9 +171,9 @@ export default function StorefrontHeader() {
                       <Link href="/account" onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-3 text-base font-semibold text-slate-700 hover:bg-[#EEF4F9] rounded-2xl transition-all">
                         <User className="w-4 h-4" aria-hidden="true" />
-                        {session?.user?.name?.split(" ")[0] || "Account"}
+                        {user?.firstName || "Account"}
                       </Link>
-                      <button onClick={() => { signOut({ callbackUrl: "/" }); setMobileMenuOpen(false) }}
+                      <button onClick={() => { signOut({ redirectUrl: "/" }); setMobileMenuOpen(false) }}
                         className="w-full flex items-center gap-2 px-4 py-3 text-base font-semibold text-red-500 hover:bg-red-50 rounded-2xl transition-all">
                         Sign Out
                       </button>

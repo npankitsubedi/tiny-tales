@@ -1,7 +1,10 @@
+import { ClerkProvider } from "@clerk/nextjs"
 import type { Metadata } from "next"
 import { Nunito } from "next/font/google"
 import { Toaster } from "react-hot-toast"
 import "./globals.css"
+
+export const dynamic = "force-dynamic"
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -32,22 +35,24 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={nunito.variable}>
-      <body className="antialiased bg-background text-foreground min-h-screen">
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              fontFamily: "var(--font-sans)",
-              borderRadius: "1rem",
-              fontSize: "14px",
-              boxShadow: "var(--shadow-md)"
-            },
-            success: { iconTheme: { primary: "var(--color-primary)", secondary: "#fff" } },
-          }}
-        />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={nunito.variable}>
+        <body className="antialiased bg-background text-foreground min-h-screen">
+          {children}
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                fontFamily: "var(--font-sans)",
+                borderRadius: "1rem",
+                fontSize: "14px",
+                boxShadow: "var(--shadow-md)"
+              },
+              success: { iconTheme: { primary: "var(--color-primary)", secondary: "#fff" } },
+            }}
+          />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
