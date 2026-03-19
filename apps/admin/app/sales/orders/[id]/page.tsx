@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { db } from "@tinytales/db"
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
