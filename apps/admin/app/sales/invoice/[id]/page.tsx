@@ -3,6 +3,8 @@
  * Renders a PDF-style A4 invoice for printing.
  */
 
+export const dynamic = 'force-dynamic';
+
 import { db } from "@tinytales/db"
 import { notFound, redirect } from "next/navigation"
 import { formatRs } from "@/lib/currency"

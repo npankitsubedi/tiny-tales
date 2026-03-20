@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@tinytales/db": "*",
-    "@clerk/nextjs": "^6",
+    "@clerk/nextjs": "^7",
     "@hookform/resolvers": "^5.2.2",
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.1",
