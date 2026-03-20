@@ -2,10 +2,11 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import { db } from "@tinytales/db"
 import { format } from "date-fns"
-import { User, Package, FileText, LogOut } from "lucide-react"
+import { Package, FileText } from "lucide-react"
 import Link from "next/link"
 import { formatRs } from "@/lib/currency"
-import { SignOutButton } from "@clerk/nextjs"
+import { UserProfile } from "@clerk/nextjs"
+import FamilyProfileForm from "@/features/account/components/FamilyProfileForm"
 
 const STATUS_COLORS: Record<string, string> = {
     PENDING: "bg-[#D9E9F2] text-[#2D5068]",
@@ -28,7 +29,7 @@ export default async function AccountPage() {
     const [user, ordersRaw] = await Promise.all([
         db.user.findUnique({
             where: { id: userId },
-            select: { id: true, name: true, email: true, role: true, createdAt: true }
+            select: { id: true, name: true, email: true, role: true, createdAt: true, birthday: true, children: true }
         }),
         db.order.findMany({
             where: { userId },
@@ -46,27 +47,23 @@ export default async function AccountPage() {
     }))
 
     return (
-        <div className="min-h-screen bg-white py-12">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-                {/* Profile Card */}
-                <div className="bg-white rounded-3xl border border-amber-50 shadow-sm p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-100 to-rose-100 flex items-center justify-center text-2xl font-bold text-[#2D5068] shrink-0 border-2 border-[#C8D9E6]">
-                        {user.name?.charAt(0)?.toUpperCase() || "U"}
-                    </div>
-                    <div className="flex-1">
-                        <h1 className="font-serif text-2xl text-slate-800">{user.name || "My Account"}</h1>
-                        <p className="text-slate-500 text-sm mt-0.5">{user.email}</p>
-                        <p className="text-xs font-medium text-slate-400 mt-1">
-                            Member since {format(new Date(user.createdAt), "MMMM yyyy")}
-                        </p>
-                    </div>
-                    <SignOutButton redirectUrl="/">
-                        <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 transition-colors px-4 py-2 rounded-xl hover:bg-red-50">
-                            <LogOut className="w-4 h-4" /> Sign Out
-                        </button>
-                    </SignOutButton>
+        <div className="min-h-screen bg-[#FAFAF8] py-12">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                
+                {/* 1. Clerk Profile Management */}
+                <div className="flex justify-center w-full">
+                    <UserProfile 
+                        appearance={{
+                            elements: {
+                                cardBox: "shadow-sm border border-slate-100 rounded-[2rem] w-full max-w-none",
+                                rootBox: "w-full flex justify-center"
+                            }
+                        }}
+                    />
                 </div>
+
+                {/* 2. Family Profile Context */}
+                <FamilyProfileForm initialData={{ birthday: user.birthday, children: user.children }} />
 
                 {/* Order History */}
                 <div>

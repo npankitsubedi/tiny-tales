@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import ProductForm from '@/features/inventory/components/ProductForm'
 
 export const metadata = {

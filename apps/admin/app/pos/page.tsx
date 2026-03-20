@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { db } from "@tinytales/db"
 import POSClient from '@/features/sales/components/POSClient'
 

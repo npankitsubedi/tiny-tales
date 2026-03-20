@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { db } from "@tinytales/db"
 import { OrderStatus } from "@tinytales/db"
 import {
